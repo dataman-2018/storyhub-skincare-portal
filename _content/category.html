@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>コンテキスト・インサイト・レポート v2 | note × StoryHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
+    <style>
+        :root {
+            --bg: #f7f6f3; --s: #fff; --t: #1a1a2e; --ts: #6b7280;
+            --a: #1a5c6b; --al: #e8f4f6; --a2: #2d8f9e; --b: #e5e2db;
+            --green: #16a34a; --red: #dc2626; --orange: #c4845e;
+            --shadow: 0 1px 3px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Noto Sans JP', 'DM Sans', sans-serif; background: var(--bg); color: var(--t); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+        .db { max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; }
+
+        /* Header */
+        .hd { padding: 40px 0 28px; border-bottom: 1px solid var(--b); margin-bottom: 28px; }
+        .hd-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; }
+        .hd-label { font-size: 12px; font-weight: 500; color: var(--a); letter-spacing: .08em; text-transform: uppercase; font-family: 'DM Sans'; margin-bottom: 6px; }
+        .hd h1 { font-size: 26px; font-weight: 700; letter-spacing: -.02em; }
+        .hd-date { font-size: 12px; color: var(--ts); margin-top: 5px; }
+        .badge-sample { padding: 5px 12px; background: #fef3e2; color: var(--orange); border-radius: 16px; font-size: 11px; font-weight: 600; }
+        .cat-selector { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; align-items: center; }
+        .cat-btn { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px; border: 1px solid var(--b); background: var(--s); cursor: pointer; font-family: 'Noto Sans JP'; font-size: 13px; font-weight: 600; }
+
+        /* Section */
+        .sec { margin-bottom: 40px; }
+        .sh { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 20px; }
+        .sn { width: 34px; height: 34px; border-radius: 8px; background: var(--a); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; font-family: 'DM Sans'; flex-shrink: 0; margin-top: 2px; }
+        .stt { font-size: 18px; font-weight: 700; }
+        .sd { font-size: 12px; color: var(--ts); margin-top: 2px; }
+        .divider { border: none; border-top: 1px solid var(--b); margin: 36px 0; }
+
+        /* Narrative bar */
+        .narrative-bar { background: linear-gradient(135deg, #1a5c6b 0%, #1a3a5c 100%); border-radius: 14px; padding: 28px 32px; color: #fff; margin-bottom: 28px; position: relative; overflow: hidden; }
+        .narrative-bar::after { content: ''; position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.03); border-radius: 50%; }
+        .narrative-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; opacity: .5; margin-bottom: 8px; font-family: 'DM Sans'; }
+        .narrative-text { font-size: 15px; line-height: 1.9; opacity: .92; }
+        .narrative-text strong { color: #7dd3c0; font-weight: 700; opacity: 1; }
+
+        /* KPI cards */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+        .kc { background: var(--s); border: 1px solid var(--b); border-radius: 12px; padding: 18px 20px; }
+        .kl { font-size: 11px; color: var(--ts); font-weight: 500; margin-bottom: 6px; }
+        .kv { font-size: 26px; font-weight: 700; font-family: 'DM Sans'; letter-spacing: -.02em; }
+        .ks { display: flex; align-items: center; gap: 8px; margin-top: 5px; font-size: 11px; color: var(--ts); }
+        .kt { font-weight: 600; font-family: 'DM Sans'; }
+        .kt.up { color: var(--green); }
+        .kt.dn { color: var(--red); }
+
+        /* Cards */
+        .card { background: var(--s); border: 1px solid var(--b); border-radius: 12px; padding: 22px; transition: box-shadow .25s; }
+        .card:hover { box-shadow: var(--shadow-md); }
+        .card-title { font-size: 13px; font-weight: 600; margin-bottom: 16px; }
+        .card-note { font-size: 10px; color: var(--ts); background: var(--bg); padding: 2px 8px; border-radius: 10px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .wide { grid-column: 1 / -1; }
+        .chart-wrap { position: relative; width: 100%; }
+        .chart-wrap.h240 { height: 240px; }
+        .chart-wrap.h260 { height: 260px; }
+        .chart-wrap.h280 { height: 280px; }
+
+        /* Trend cards */
+        .trend-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .trend-card { padding: 14px; border-radius: 10px; border: 1px solid var(--b); transition: all .2s; }
+        .trend-card:hover { border-color: var(--a); background: var(--al); }
+        .trend-card .name { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+        .trend-card .meta { font-size: 10px; color: var(--ts); display: flex; gap: 8px; }
+        .trend-card .growth { font-size: 10px; font-weight: 600; margin-top: 3px; }
+        .trend-card .growth.hot { color: var(--orange); }
+        .trend-card .growth.up { color: var(--green); }
+
+        /* Funnel */
+        .funnel-row { display: flex; align-items: flex-end; gap: 2px; height: 180px; padding: 0 10px; }
+        .funnel-stage { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .funnel-bar-wrap { width: 100%; display: flex; flex-direction: column; align-items: center; flex: 1; justify-content: flex-end; }
+        .funnel-bar { width: 70%; border-radius: 6px 6px 0 0; background: var(--a); min-height: 4px; }
+        .funnel-val { font-size: 12px; font-weight: 700; font-family: 'DM Sans'; }
+        .funnel-lbl { font-size: 9px; color: var(--ts); text-align: center; font-weight: 600; }
+        .funnel-arrow { font-size: 9px; color: var(--ts); text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 24px; }
+        .funnel-arrow .rate { font-size: 10px; font-weight: 700; color: var(--orange); }
+
+        /* Table */
+        .rt { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .rt th { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--ts); font-weight: 600; padding: 7px 10px; text-align: left; border-bottom: 2px solid var(--b); }
+        .rt td { padding: 10px; font-size: 12px; border-bottom: 1px solid var(--b); }
+        .rt tr:hover td { background: var(--al); }
+        .self-row { background: var(--al); }
+        .self-row td:nth-child(2) { font-weight: 700; color: var(--a); }
+
+        /* Narrative pills */
+        .n-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+        .n-pill { padding: 8px 16px; border-radius: 20px; font-size: 12px; background: var(--s); border: 1px solid var(--b); display: flex; align-items: center; gap: 10px; }
+        .n-pill .pct { font-weight: 700; color: var(--a); font-family: 'DM Sans'; }
+        .n-pill .bar-bg { width: 50px; height: 5px; background: var(--b); border-radius: 3px; overflow: hidden; }
+        .n-pill .bar-fill { height: 100%; background: var(--a); border-radius: 3px; }
+
+        /* Sentiment bar */
+        .sent-bar { display: flex; height: 6px; border-radius: 3px; overflow: hidden; gap: 1px; width: 100%; }
+
+        /* Opportunity cards */
+        .opp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+        .opp-card { background: var(--s); border: 1px solid var(--b); border-radius: 12px; padding: 22px; border-top: 3px solid var(--a); }
+        .opp-card.hot { border-top-color: var(--orange); }
+        .opp-card .opp-tag { font-size: 10px; font-weight: 700; color: var(--a); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+        .opp-card.hot .opp-tag { color: var(--orange); }
+        .opp-card h4 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+        .opp-card p { font-size: 12px; color: var(--ts); line-height: 1.7; margin-bottom: 12px; }
+        .opp-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .opp-metric { padding: 6px 10px; background: var(--bg); border-radius: 6px; font-size: 11px; display: flex; justify-content: space-between; }
+        .opp-metric .label { color: var(--ts); }
+        .opp-metric .value { font-weight: 700; }
+
+        /* Insight box */
+        .insight-box { background: linear-gradient(135deg, var(--a) 0%, #1a3a5c 100%); border-radius: 14px; padding: 24px 28px; color: #fff; margin-top: 14px; }
+        .insight-box h3 { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+        .insight-list { display: flex; flex-direction: column; gap: 8px; }
+        .insight-item { display: flex; gap: 10px; font-size: 12px; line-height: 1.6; opacity: .92; }
+        .insight-num { width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+
+        /* Progress bar */
+        .prog-row { margin-bottom: 16px; }
+        .prog-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .prog-label { font-size: 12px; font-weight: 500; }
+        .prog-val { font-size: 13px; font-weight: 700; font-family: 'DM Sans'; }
+        .prog-bar { height: 5px; background: var(--b); border-radius: 3px; overflow: hidden; }
+        .prog-fill { height: 100%; background: linear-gradient(90deg, var(--a), var(--a2)); border-radius: 3px; }
+
+        /* Footer */
+        .footer { border-top: 1px solid var(--b); padding-top: 20px; margin-top: 40px; display: flex; justify-content: space-between; font-size: 11px; color: #9ca3af; flex-wrap: wrap; gap: 6px; }
+
+        @media (max-width: 900px) {
+            .kpi-grid, .trend-grid { grid-template-columns: repeat(2, 1fr); }
+            .grid-2, .opp-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 600px) {
+            .db { padding: 0 16px 60px; }
+            .kpi-grid, .trend-grid { grid-template-columns: 1fr 1fr; }
+        }
+        /* Portal Nav */
+        .portal-nav{position:fixed;top:0;left:0;right:0;z-index:9999;height:40px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(26,26,46,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.06)}
+        .portal-brand{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:#fff;letter-spacing:.03em;opacity:.7}
+        .portal-brand a{color:#fff;text-decoration:none}
+        .portal-links{display:flex;gap:20px}
+        .portal-links a{font-size:11px;color:#fff;text-decoration:none;opacity:.5;transition:opacity .2s;padding-bottom:2px}
+        .portal-links a:hover{opacity:1}
+        .portal-links a.active{opacity:1;color:#2d8f9e;border-bottom:2px solid #2d8f9e}
+    </style>
+</head>
+<body>
+<nav class="portal-nav">
+  <div class="portal-brand"><a href="/">note × StoryHub</a></div>
+  <div class="portal-links">
+    <a href="/">ポータル</a>
+    <a href="/market">市場レポート</a>
+    <a href="/category" class="active">カテゴリ</a>
+    <a href="/sofina">ソフィーナIP</a>
+  </div>
+</nav>
+<div class="db" style="padding-top:48px;">
+
+    <!-- Header -->
+    <div class="hd">
+        <div class="hd-top">
+            <div>
+                <div class="hd-label">note × StoryHub</div>
+                <h1>コンテキスト・インサイト・レポート</h1>
+                <div class="hd-date">2025/04 – 2026/03 ｜ 更新: 2026/03/09</div>
+            </div>
+            <div class="badge-sample">⚡ SAMPLE v2</div>
+        </div>
+        <div class="cat-selector">
+            <button class="cat-btn"><span>💄</span><span>化粧品</span><span style="font-size:10px;color:#9ca3af;margin-left:4px">▼</span></button>
+            <div style="color:var(--b);font-size:18px">›</div>
+            <button class="cat-btn"><span>スキンケア（基礎化粧品）</span><span style="font-size:10px;color:#9ca3af;margin-left:4px">▼</span></button>
+        </div>
+    </div>
+
+    <!-- ===== 1. Executive Narrative ===== -->
+    <div class="narrative-bar">
+        <div class="narrative-label">Category Narrative — 2026/03</div>
+        <div class="narrative-text">
+            スキンケアカテゴリは前年比<strong>+18%</strong>でnote全体の成長率を上回る成長市場。特に<strong>メンズスキンケア（+62%）</strong>と<strong>成分解説（+55%）</strong>が牽引。読者の完読率<strong>62%</strong>はnote全体平均の1.3倍だが、完読→スキの転換率<strong>14%</strong>はカテゴリポテンシャルに対して低い。最大の機会は<strong>LLM経由流入の急成長（+45%）</strong>と、需給ギャップが大きい<strong>エイジングケア</strong>文脈。検索資産としてのnoteの価値が、このカテゴリで最も顕在化し始めている。
+        </div>
+    </div>
+
+    <div class="kpi-grid">
+        <div class="kc"><div class="kl">関連記事数</div><div class="kv">30,970</div><div class="ks"><span class="kt up">↑ 24%</span><span>前年比</span></div></div>
+        <div class="kc"><div class="kl">月間PV</div><div class="kv">4.51M</div><div class="ks"><span class="kt up">↑ 18%</span><span>前年比</span></div></div>
+        <div class="kc"><div class="kl">月間UU</div><div class="kv">1.60M</div><div class="ks"><span class="kt up">↑ 22%</span><span>前年比</span></div></div>
+        <div class="kc"><div class="kl">カテゴリ健康度</div><div class="kv">87</div><div class="ks"><span>/ 100</span></div></div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- ===== 2. Category Now ===== -->
+    <div class="sec">
+        <div class="sh"><div class="sn">01</div><div><h2 class="stt">カテゴリの今</h2><p class="sd">市場の全体像 — 文脈クラスターと需給バランス</p></div></div>
+
+        <div class="card wide" style="margin-bottom:14px;">
+            <div class="card-header"><h3 class="card-title">PV・UUトレンド（12ヶ月）</h3></div>
+            <div class="chart-wrap h240"><canvas id="pvTrendChart"></canvas></div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:14px;">
+            <div class="card">
+                <div class="card-header"><h3 class="card-title">文脈クラスター — PVシェア</h3><span class="card-note">PV × 成長率</span></div>
+                <div class="chart-wrap h260"><canvas id="clusterChart"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3 class="card-title">需給ギャップ — コンテンツ供給は足りているか？</h3><span class="card-note">PV÷記事数 = 需給比</span></div>
+                <div class="chart-wrap h260"><canvas id="demandSupplyChart"></canvas></div>
+            </div>
+        </div>
+
+        <div style="margin-bottom:8px;font-size:12px;font-weight:600;color:var(--ts);">急上昇テーマ TOP 8</div>
+        <div class="trend-grid">
+            <div class="trend-card"><div class="name">メンズスキンケア</div><div class="meta"><span>280記事</span><span>390K PV</span></div><div class="growth hot">🔥 +62%</div></div>
+            <div class="trend-card"><div class="name">成分解説</div><div class="meta"><span>420記事</span><span>640K PV</span></div><div class="growth hot">🔥 +55%</div></div>
+            <div class="trend-card"><div class="name">韓国コスメ×プチプラ</div><div class="meta"><span>890記事</span><span>1.3M PV</span></div><div class="growth hot">🔥 +45%</div></div>
+            <div class="trend-card"><div class="name">敏感肌×セラミド</div><div class="meta"><span>680記事</span><span>920K PV</span></div><div class="growth up">↑ +32%</div></div>
+            <div class="trend-card"><div class="name">オーガニック</div><div class="meta"><span>340記事</span><span>480K PV</span></div><div class="growth up">↑ +28%</div></div>
+            <div class="trend-card"><div class="name">エイジングケア</div><div class="meta"><span>520記事</span><span>710K PV</span></div><div class="growth up">↑ +18%</div></div>
+            <div class="trend-card"><div class="name">美白×UVケア</div><div class="meta"><span>610記事</span><span>850K PV</span></div><div class="growth up">↑ +12%</div></div>
+            <div class="trend-card"><div class="name">ドラコス×レビュー</div><div class="meta"><span>750記事</span><span>1.1M PV</span></div><div class="growth up">↑ +8%</div></div>
+        </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- ===== 3. Reader Behavior ===== -->
+    <div class="sec">
+        <div class="sh"><div class="sn">02</div><div><h2 class="stt">読者はどう動いているか</h2><p class="sd">ファネル・読了深度・流入チャネル・関心プロファイル</p></div></div>
+
+        <div class="grid-2" style="margin-bottom:14px;">
+            <div class="card">
+                <div class="card-header"><h3 class="card-title">読者アクションファネル</h3><span class="card-note">カテゴリ平均</span></div>
+                <div class="funnel-row" id="funnelArea"></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3 class="card-title">読了深度</h3><span class="card-note">離脱ポイント分布</span></div>
+                <div class="chart-wrap h240"><canvas id="readDepthChart"></canvas></div>
+                <div style="margin-top:10px;padding:10px 12px;background:var(--bg);border-radius:8px;font-size:11px;color:var(--ts);">
+                    最適記事長: <strong style="color:var(--t);">2,000〜3,500字</strong>（完読率のピーク帯）｜読了率×文字数の相関: <strong style="color:var(--t);">-0.42</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header"><h3 class="card-title">流入チャネルミックス</h3></div>
+                <div class="chart-wrap h240"><canvas id="channelChart"></canvas></div>
+                <div style="margin-top:12px;padding:10px 12px;background:#fef3e2;border-radius:8px;font-size:11px;">
+                    <strong style="color:var(--orange);">注目:</strong> LLM経由流入が<strong>4.2%</strong>（前年比+45%）。ChatGPT 52%、Perplexity 28%、AI Overview 20%。スキンケアはnote内でLLM流入比率が最も高いカテゴリ。
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3 class="card-title">読者の関心プロファイル</h3><span class="card-note">このカテゴリの読者は他に何を読むか</span></div>
+                <div class="chart-wrap h240"><canvas id="interestChart"></canvas></div>
+                <div style="margin-top:10px;padding:10px 12px;background:var(--bg);border-radius:8px;font-size:11px;color:var(--ts);">
+                    ターゲット合致度: <strong style="color:var(--t);">74%</strong>（カテゴリ設定ターゲットとの一致率）
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- ===== 4. Brand & Narrative ===== -->
+    <div class="sec">
+        <div class="sh"><div class="sn">03</div><div><h2 class="stt">ブランドはどう語られているか</h2><p class="sd">競争環境・UGCナラティブ・感情分析</p></div></div>
+
+        <div class="card wide" style="margin-bottom:14px;">
+            <div class="card-header"><h3 class="card-title">ブランド言及ランキング</h3><span class="card-note">言及数 × PV × 読了率 × センチメント</span></div>
+            <div style="overflow-x:auto;">
+                <table class="rt">
+                    <thead><tr><th>#</th><th>ブランド</th><th>言及</th><th>PV</th><th>読了率</th><th>センチメント</th><th>ポジ率</th><th>ポジショニングスコア</th></tr></thead>
+                    <tbody>
+                        <tr><td style="font-weight:700;font-family:DM Sans;color:var(--a);">1</td><td>無印良品</td><td style="font-family:DM Sans">650</td><td style="font-family:DM Sans">890K</td><td style="font-family:DM Sans">58%</td><td><div class="sent-bar"><div style="width:74%;background:var(--green)"></div><div style="width:20%;background:#d1d5db"></div><div style="width:6%;background:var(--red)"></div></div></td><td style="font-family:DM Sans;font-weight:600">74%</td><td style="font-family:DM Sans;font-weight:700;color:var(--a);">82</td></tr>
+                        <tr><td style="font-weight:700;font-family:DM Sans;color:var(--a);">2</td><td>キュレル</td><td style="font-family:DM Sans">520</td><td style="font-family:DM Sans">730K</td><td style="font-family:DM Sans">65%</td><td><div class="sent-bar"><div style="width:80%;background:var(--green)"></div><div style="width:15%;background:#d1d5db"></div><div style="width:5%;background:var(--red)"></div></div></td><td style="font-family:DM Sans;font-weight:600;color:var(--green)">80%</td><td style="font-family:DM Sans;font-weight:700;color:var(--a);">79</td></tr>
+                        <tr><td style="font-weight:700;font-family:DM Sans;color:var(--a);">3</td><td>ELIXIR</td><td style="font-family:DM Sans">480</td><td style="font-family:DM Sans">680K</td><td style="font-family:DM Sans">54%</td><td><div class="sent-bar"><div style="width:72%;background:var(--green)"></div><div style="width:21%;background:#d1d5db"></div><div style="width:7%;background:var(--red)"></div></div></td><td style="font-family:DM Sans;font-weight:600">72%</td><td style="font-family:DM Sans;font-weight:700">68</td></tr>
+                        <tr class="self-row"><td style="font-weight:700;font-family:DM Sans">4</td><td>ソフィーナIP</td><td style="font-family:DM Sans">420</td><td style="font-family:DM Sans">590K</td><td style="font-family:DM Sans;color:var(--green);font-weight:600;">68%</td><td><div class="sent-bar"><div style="width:78%;background:var(--green)"></div><div style="width:17%;background:#d1d5db"></div><div style="width:5%;background:var(--red)"></div></div></td><td style="font-family:DM Sans;font-weight:600;color:var(--green)">78%</td><td style="font-family:DM Sans;font-weight:700;color:var(--a);">76</td></tr>
+                        <tr><td style="font-weight:700;font-family:DM Sans">5</td><td>SK-II</td><td style="font-family:DM Sans">390</td><td style="font-family:DM Sans">550K</td><td style="font-family:DM Sans">52%</td><td><div class="sent-bar"><div style="width:77%;background:var(--green)"></div><div style="width:17%;background:#d1d5db"></div><div style="width:6%;background:var(--red)"></div></div></td><td style="font-family:DM Sans;font-weight:600;color:var(--green)">77%</td><td style="font-family:DM Sans;font-weight:700">72</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:14px;">
+            <div class="card">
+                <div class="card-header"><h3 class="card-title">ブランド×文脈 ポジションマップ</h3><span class="card-note">言及数 vs 読了率</span></div>
+                <div class="chart-wrap h260"><canvas id="brandPositionChart"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3 class="card-title">カテゴリ感情分析</h3><span class="card-note">P/N比推移 & 感情カテゴリ</span></div>
+                <div class="chart-wrap h260"><canvas id="sentimentChart"></canvas></div>
+                <div style="margin-top:10px;font-size:11px;color:var(--ts);">
+                    ネガティブ上位: 効果実感不足 38% / 価格不満 28% / 肌トラブル 22% / その他 12%
+                </div>
+            </div>
+        </div>
+
+        <div class="card wide">
+            <div class="card-header"><h3 class="card-title">UGCナラティブ分析 — ユーザーはブランドをどう語っているか</h3></div>
+            <div class="n-pills" style="margin-bottom:16px;">
+                <div class="n-pill"><span>信頼の定番</span><span class="pct">28%</span><span class="bar-bg"><span class="bar-fill" style="width:70%"></span></span></div>
+                <div class="n-pill"><span>コスパ最強</span><span class="pct">22%</span><span class="bar-bg"><span class="bar-fill" style="width:55%"></span></span></div>
+                <div class="n-pill"><span>敏感肌の救世主</span><span class="pct">18%</span><span class="bar-bg"><span class="bar-fill" style="width:45%"></span></span></div>
+                <div class="n-pill"><span>成分で選ぶ</span><span class="pct">14%</span><span class="bar-bg"><span class="bar-fill" style="width:35%"></span></span></div>
+                <div class="n-pill"><span>ルーティン紹介</span><span class="pct">10%</span><span class="bar-bg"><span class="bar-fill" style="width:25%"></span></span></div>
+                <div class="n-pill"><span>ギフト・おすすめ</span><span class="pct">8%</span><span class="bar-bg"><span class="bar-fill" style="width:20%"></span></span></div>
+            </div>
+            <div style="padding:14px;background:var(--bg);border-radius:8px;font-size:12px;color:var(--ts);line-height:1.8;">
+                <strong style="color:var(--a);">公式 vs UGCのギャップ:</strong> ブランド公式は「成分・技術」軸で発信するが、UGCでは<strong style="color:var(--t);">「コスパ」（22%）</strong>と<strong style="color:var(--t);">「ルーティン紹介」（10%）</strong>が大きな比率を占める。特に「コスパ最強」文脈は公式発信にほぼゼロだが、UGCでは2位。ギャップスコア: <strong style="color:var(--t);">0.58</strong>
+            </div>
+        </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- ===== 5. Opportunities ===== -->
+    <div class="sec">
+        <div class="sh"><div class="sn">04</div><div><h2 class="stt">チャンスはどこにあるか</h2><p class="sd">需給ギャップ・成功パターン・AIO適格度・アクション提案</p></div></div>
+
+        <div class="grid-2" style="margin-bottom:14px;">
+            <div class="card">
+                <div class="card-header"><h3 class="card-title">成功記事の共通パターン</h3><span class="card-note">上位25% vs 下位25%</span></div>
+                <table class="rt">
+                    <thead><tr><th>特徴量</th><th style="color:var(--green);">上位記事</th><th style="color:var(--red);">下位記事</th><th>相関</th></tr></thead>
+                    <tbody>
+                        <tr><td style="font-weight:600;">テーマ</td><td style="color:var(--green);">体験談・比較</td><td style="color:var(--red);">ブランド紹介</td><td style="font-family:DM Sans;font-weight:600;">0.68</td></tr>
+                        <tr><td style="font-weight:600;">主語</td><td style="color:var(--green);">一人称</td><td style="color:var(--red);">三人称</td><td style="font-family:DM Sans;font-weight:600;">0.62</td></tr>
+                        <tr><td style="font-weight:600;">文字数</td><td style="color:var(--green);">2,000〜3,500字</td><td style="color:var(--red);">5,000字以上</td><td style="font-family:DM Sans;font-weight:600;">0.58</td></tr>
+                        <tr><td style="font-weight:600;">構成</td><td style="color:var(--green);">Before/After型</td><td style="color:var(--red);">リスト型</td><td style="font-family:DM Sans;font-weight:600;">0.55</td></tr>
+                        <tr><td style="font-weight:600;">公開曜日</td><td style="color:var(--green);">火・木・日</td><td style="color:var(--red);">月・土</td><td style="font-family:DM Sans;font-weight:600;">0.38</td></tr>
+                        <tr><td style="font-weight:600;">画像</td><td style="color:var(--green);">4〜7枚</td><td style="color:var(--red);">1枚以下</td><td style="font-family:DM Sans;font-weight:600;">0.45</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3 class="card-title">AIO引用適格度</h3><span class="card-note">AI検索に引用される可能性</span></div>
+                <div class="chart-wrap h240"><canvas id="aioChart"></canvas></div>
+                <div style="margin-top:10px;padding:10px 12px;background:#fef3e2;border-radius:8px;font-size:11px;">
+                    <strong style="color:var(--orange);">示唆:</strong> AIO適格度4以上の記事は全体の<strong>12%</strong>だが、カテゴリPVの<strong>28%</strong>を占める。Q&A構造+具体数値+一人称の組み合わせがAIO引用の鍵。noteがAI時代の「引用元メディア」になりうるカテゴリ。
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom:12px;font-size:14px;font-weight:700;">このカテゴリで打つべき手</div>
+        <div class="opp-grid">
+            <div class="opp-card hot">
+                <div class="opp-tag">🔥 最大機会</div>
+                <h4>メンズスキンケア コンテスト</h4>
+                <p>成長率+62%で急拡大中だが、ブランドコンテンツは極めて少ない。UGCコンテストで一気に文脈を形成できるタイミング。</p>
+                <div class="opp-metrics">
+                    <div class="opp-metric"><span class="label">需給比</span><span class="value">4.1（最高）</span></div>
+                    <div class="opp-metric"><span class="label">競合参入</span><span class="value">低</span></div>
+                </div>
+            </div>
+            <div class="opp-card">
+                <div class="opp-tag">成長文脈</div>
+                <h4>成分解説 × AIO最適化</h4>
+                <p>「セラミドとは」「レチノール 効果」等のQ&A型記事はAIO適格度が高く、検索資産化の余地が大きい。</p>
+                <div class="opp-metrics">
+                    <div class="opp-metric"><span class="label">AIO適格</span><span class="value">4.2/5</span></div>
+                    <div class="opp-metric"><span class="label">検索流入</span><span class="value">+55%</span></div>
+                </div>
+            </div>
+            <div class="opp-card">
+                <div class="opp-tag">クロスカテゴリ</div>
+                <h4>スキンケア × ウェルネス連携</h4>
+                <p>読者の回遊先で「健康食品」（32%）と「メンタルヘルス」（18%）が高い。インナーケア文脈の接続が有効。</p>
+                <div class="opp-metrics">
+                    <div class="opp-metric"><span class="label">回遊率</span><span class="value">32%</span></div>
+                    <div class="opp-metric"><span class="label">成長率</span><span class="value">+28%</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="insight-box">
+            <h3>noteプラットフォームとしての示唆</h3>
+            <div class="insight-list">
+                <div class="insight-item"><div class="insight-num">1</div><div>スキンケアカテゴリはLLM経由流入比率がnote内最高（4.2%）。AI検索時代の「引用元メディア」としてのnoteの価値を、このカテゴリで実証できる。AIO適格記事の量産を支援するテンプレート提供が有効。</div></div>
+                <div class="insight-item"><div class="insight-num">2</div><div>メンズスキンケア（+62%）は需給ギャップが最大。ブランドのコンテスト出稿を誘導すれば、note上のUGC量と広告収益の同時拡大が見込める。</div></div>
+                <div class="insight-item"><div class="insight-num">3</div><div>完読率62%に対しフォロー転換率14%は、コンテンツの質は高いが「次のアクション」の導線が弱い。記事末のフォローCTA最適化や、関連記事レコメンドの精度向上が構造的な改善策。</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <span>note × StoryHub｜Context Insight Report v2</span>
+        <span>サンプルデータ</span>
+    </div>
+</div>
+
+<script>
+// Chart.js defaults
+Chart.defaults.font.family = "'DM Sans', 'Noto Sans JP', sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#6b7280';
+
+const MONTHS = ['4月','5月','6月','7月','8月','9月','10月','11月','12月','1月','2月','3月'];
+
+// 1. PV/UU Trend
+new Chart(document.getElementById('pvTrendChart'), {
+    type: 'line',
+    data: {
+        labels: MONTHS,
+        datasets: [
+            { label: 'PV (万)', data: [280,295,310,320,340,350,365,380,395,420,440,451], borderColor: '#1a5c6b', backgroundColor: 'rgba(26,92,107,0.08)', fill: true, tension: 0.3, borderWidth: 2.5, pointRadius: 3, yAxisID: 'y' },
+            { label: 'UU (万)', data: [98,103,108,112,118,122,128,134,140,148,155,160], borderColor: '#2d8f9e', borderWidth: 2, tension: 0.3, pointRadius: 3, borderDash: [5,3], yAxisID: 'y1' }
+        ]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 16 } } },
+        scales: { y: { ticks: { callback: v => v + '万' }, grid: { color: '#f0f0f0' } }, y1: { position: 'right', ticks: { callback: v => v + '万' }, grid: { display: false } }, x: { grid: { display: false } } }
+    }
+});
+
+// 2. Cluster bubble
+new Chart(document.getElementById('clusterChart'), {
+    type: 'bubble',
+    data: {
+        datasets: [
+            { label: '韓国コスメ', data: [{x:1300,y:45,r:18}], backgroundColor: 'rgba(196,132,94,0.6)' },
+            { label: 'メンズ', data: [{x:390,y:62,r:10}], backgroundColor: 'rgba(196,132,94,0.8)' },
+            { label: '成分解説', data: [{x:640,y:55,r:12}], backgroundColor: 'rgba(196,132,94,0.7)' },
+            { label: '敏感肌×セラミド', data: [{x:920,y:32,r:15}], backgroundColor: 'rgba(26,92,107,0.6)' },
+            { label: 'エイジング', data: [{x:710,y:18,r:13}], backgroundColor: 'rgba(45,143,158,0.5)' },
+            { label: 'ドラコス', data: [{x:1100,y:8,r:16}], backgroundColor: 'rgba(209,213,219,0.5)' },
+            { label: 'オーガニック', data: [{x:480,y:28,r:11}], backgroundColor: 'rgba(45,143,158,0.4)' },
+            { label: '美白×UV', data: [{x:850,y:12,r:14}], backgroundColor: 'rgba(209,213,219,0.4)' }
+        ]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.dataset.label + ' PV:' + ctx.parsed.x + 'K 成長:+' + ctx.parsed.y + '%' } } },
+        scales: { x: { title: { display: true, text: 'PV (K)', font: { size: 10 } }, grid: { color: '#f0f0f0' } }, y: { title: { display: true, text: '成長率 (%)', font: { size: 10 } }, grid: { color: '#f0f0f0' } } }
+    }
+});
+
+// 3. Demand/Supply
+new Chart(document.getElementById('demandSupplyChart'), {
+    type: 'bar',
+    data: {
+        labels: ['メンズ','成分解説','エイジング','オーガニック','敏感肌','美白UV','韓国コスメ','ドラコス'],
+        datasets: [{ label: '需給比 (PV÷記事数)', data: [4.1,3.5,2.8,2.6,2.1,1.8,1.5,1.3],
+            backgroundColor: d => d.raw > 3 ? 'rgba(196,132,94,0.7)' : d.raw > 2 ? 'rgba(26,92,107,0.6)' : 'rgba(209,213,219,0.5)', borderRadius: 4 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+        plugins: { legend: { display: false } },
+        scales: { x: { grid: { color: '#f0f0f0' }, title: { display: true, text: '需給比（高い＝コンテンツ供給が不足）', font: { size: 10 } } }, y: { grid: { display: false } } }
+    }
+});
+
+// 4. Funnel
+const funnelData = [
+    { label: '表示', value: 4510000, rate: null },
+    { label: '25%読了', value: 2930000, rate: '65%' },
+    { label: '完読', value: 2796000, rate: '62%' },
+    { label: 'スキ', value: 391000, rate: '14%' },
+    { label: 'フォロー', value: 54700, rate: '14%' }
+];
+const maxF = funnelData[0].value;
+let fhtml = '';
+funnelData.forEach((s, i) => {
+    const h = Math.max(8, (s.value / maxF) * 150);
+    const op = 1 - (i * 0.15);
+    fhtml += `<div class="funnel-stage"><div class="funnel-val">${(s.value/1000000).toFixed(s.value>=1000000?2:1)}M</div><div class="funnel-bar-wrap"><div class="funnel-bar" style="height:${h}px;opacity:${op};"></div></div><div class="funnel-lbl">${s.label}</div></div>`;
+    if (i < funnelData.length - 1) fhtml += `<div class="funnel-arrow"><div class="rate">${funnelData[i+1].rate}</div><div>→</div></div>`;
+});
+document.getElementById('funnelArea').innerHTML = fhtml;
+
+// 5. Read depth
+new Chart(document.getElementById('readDepthChart'), {
+    type: 'bar',
+    data: {
+        labels: ['0%離脱','〜25%','〜50%','〜75%','100%完読'],
+        datasets: [{ data: [8,18,14,22,38], backgroundColor: ['#dc2626','#f59e0b','#f59e0b','#2d8f9e','#1a5c6b'], borderRadius: 4 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { ticks: { callback: v => v + '%' }, grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } }
+    }
+});
+
+// 6. Channel mix
+new Chart(document.getElementById('channelChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['検索流入','SNS','note内回遊','外部リンク','LLM経由','直接流入'],
+        datasets: [{ data: [42,28,18,8,4.2,3.8], backgroundColor: ['#1a5c6b','#2d8f9e','#5bbdc9','#a8dce3','#c4845e','#d4eff3'], borderWidth: 2, borderColor: '#fff' }]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'right', labels: { usePointStyle: true, padding: 8, font: { size: 10 } } } }
+    }
+});
+
+// 7. Interest profile
+new Chart(document.getElementById('interestChart'), {
+    type: 'radar',
+    data: {
+        labels: ['メイク','ヘアケア','健康食品','ファッション','メンタルヘルス','料理・食'],
+        datasets: [{ label: '読者回遊率(%)', data: [62,45,32,28,18,15], backgroundColor: 'rgba(26,92,107,0.12)', borderColor: '#1a5c6b', borderWidth: 2, pointBackgroundColor: '#1a5c6b', pointRadius: 4 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { r: { beginAtZero: true, max: 80, ticks: { stepSize: 20, font: { size: 9 } }, pointLabels: { font: { size: 10 } } } }
+    }
+});
+
+// 8. Brand position scatter
+new Chart(document.getElementById('brandPositionChart'), {
+    type: 'scatter',
+    data: {
+        datasets: [
+            { label: '無印良品', data: [{x:650,y:58}], backgroundColor: 'rgba(107,114,128,0.5)', pointRadius: 12 },
+            { label: 'キュレル', data: [{x:520,y:65}], backgroundColor: 'rgba(22,163,74,0.5)', pointRadius: 10 },
+            { label: 'ELIXIR', data: [{x:480,y:54}], backgroundColor: 'rgba(107,114,128,0.4)', pointRadius: 10 },
+            { label: 'ソフィーナIP', data: [{x:420,y:68}], backgroundColor: 'rgba(26,92,107,0.8)', pointRadius: 10 },
+            { label: 'SK-II', data: [{x:390,y:52}], backgroundColor: 'rgba(107,114,128,0.4)', pointRadius: 9 },
+            { label: 'ORBIS', data: [{x:380,y:60}], backgroundColor: 'rgba(107,114,128,0.3)', pointRadius: 9 },
+            { label: 'HAKU', data: [{x:360,y:72}], backgroundColor: 'rgba(22,163,74,0.4)', pointRadius: 8 },
+            { label: 'IPSA', data: [{x:290,y:70}], backgroundColor: 'rgba(22,163,74,0.4)', pointRadius: 7 }
+        ]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 8, font: { size: 9 } } },
+            tooltip: { callbacks: { label: ctx => [ctx.dataset.label, '言及: ' + ctx.parsed.x, '読了率: ' + ctx.parsed.y + '%'] } } },
+        scales: { x: { title: { display: true, text: '言及数', font: { size: 10 } }, grid: { color: '#f0f0f0' } }, y: { title: { display: true, text: '読了率(%)', font: { size: 10 } }, grid: { color: '#f0f0f0' } } }
+    }
+});
+
+// 9. Sentiment P/N trend
+new Chart(document.getElementById('sentimentChart'), {
+    type: 'bar',
+    data: {
+        labels: ['感謝・共感','質問・深掘り','ニュートラル','ネガティブ'],
+        datasets: [{ data: [42,26,22,10], backgroundColor: ['#16a34a','#2d8f9e','#d1d5db','#dc2626'], borderRadius: 4 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { ticks: { callback: v => v + '%' }, grid: { color: '#f0f0f0' } }, x: { grid: { display: false } } }
+    }
+});
+
+// 10. AIO eligibility
+new Chart(document.getElementById('aioChart'), {
+    type: 'bar',
+    data: {
+        labels: ['0 (不適格)','1','2','3','4','5 (最適格)'],
+        datasets: [{ label: '記事比率', data: [15,20,25,28,8,4], backgroundColor: d => d.dataIndex >= 4 ? 'rgba(196,132,94,0.7)' : 'rgba(26,92,107,0.4)', borderRadius: 4 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { ticks: { callback: v => v + '%' }, grid: { color: '#f0f0f0' } }, x: { title: { display: true, text: 'AIO適格度スコア', font: { size: 10 } }, grid: { display: false } } }
+    }
+});
+</script>
+</body>
+</html>

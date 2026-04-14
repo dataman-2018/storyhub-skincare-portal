@@ -1,0 +1,29 @@
+{
+  "rewrites": [
+    {
+      "source": "/market",
+      "has": [{ "type": "cookie", "key": "sh_auth" }],
+      "destination": "/_content/market.html"
+    },
+    {
+      "source": "/category",
+      "has": [{ "type": "cookie", "key": "sh_auth" }],
+      "destination": "/_content/category.html"
+    },
+    {
+      "source": "/sofina",
+      "has": [{ "type": "cookie", "key": "sh_auth" }],
+      "destination": "/_content/sofina.html"
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "cookie", "key": "sh_auth" }],
+      "destination": "/_content/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "missing": [{ "type": "cookie", "key": "sh_auth" }],
+      "destination": "/api/gate?from=/$1"
+    }
+  ]
+}

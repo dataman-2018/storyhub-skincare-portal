@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOFINA iP 施策ドリブン・ダッシュボード | note</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
+    <style>
+        :root {
+            --brand-primary: #6B4C8A;
+            --brand-light: #9B7FBD;
+            --brand-bg: #F8F5FB;
+            --accent-green: #2E9E6B;
+            --accent-red: #D94F4F;
+            --accent-orange: #E8943A;
+            --accent-blue: #4A8FD6;
+            --gray-50: #FAFAFA;
+            --gray-100: #F5F5F5;
+            --gray-200: #EEEEEE;
+            --gray-300: #E0E0E0;
+            --gray-400: #BDBDBD;
+            --gray-500: #9E9E9E;
+            --gray-600: #757575;
+            --gray-700: #616161;
+            --gray-800: #424242;
+            --gray-900: #212121;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+            --radius: 12px;
+            --radius-lg: 16px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+            background: var(--gray-100);
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+        .dashboard { max-width: 1280px; margin: 0 auto; padding: 24px; }
+
+        /* Header */
+        .dash-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+        }
+        .dash-header h1 { font-size: 22px; font-weight: 700; color: var(--brand-primary); }
+        .dash-header h1 span { font-size: 13px; font-weight: 400; color: var(--gray-500); margin-left: 12px; }
+        .header-controls { display: flex; gap: 10px; align-items: center; }
+        .header-controls select {
+            padding: 8px 14px; border: 1px solid var(--gray-300); border-radius: 8px;
+            font-size: 13px; background: white; color: var(--gray-700); cursor: pointer;
+        }
+        .proto-badge {
+            display: inline-block; background: var(--brand-primary); color: white;
+            font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+        }
+
+        /* ===== Section 1: AI Diagnosis ===== */
+        .diagnosis-bar {
+            background: linear-gradient(135deg, #6B4C8A 0%, #8B6BAA 50%, #9B7FBD 100%);
+            border-radius: var(--radius-lg); padding: 28px 32px; margin-bottom: 28px;
+            color: white; position: relative; overflow: hidden;
+        }
+        .diagnosis-bar::after {
+            content: ''; position: absolute; top: -60px; right: -60px;
+            width: 240px; height: 240px; background: rgba(255,255,255,0.04);
+            border-radius: 50%;
+        }
+        .diagnosis-label {
+            font-size: 11px; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 1.5px; opacity: 0.6; margin-bottom: 8px;
+        }
+        .diagnosis-text {
+            font-size: 20px; font-weight: 700; line-height: 1.5; margin-bottom: 16px;
+        }
+        .diagnosis-sub {
+            font-size: 14px; line-height: 1.8; opacity: 0.88;
+        }
+        .diagnosis-sub strong { color: #FFD86E; font-weight: 700; opacity: 1; }
+        .diagnosis-kpis {
+            display: flex; gap: 32px; margin-top: 20px; padding-top: 18px;
+            border-top: 1px solid rgba(255,255,255,0.15); flex-wrap: wrap;
+        }
+        .diagnosis-kpi { text-align: center; }
+        .diagnosis-kpi-value { font-size: 28px; font-weight: 700; }
+        .diagnosis-kpi-label { font-size: 11px; opacity: 0.6; margin-top: 2px; }
+        .diagnosis-kpi-change { font-size: 12px; font-weight: 600; }
+        .diagnosis-kpi-change.up { color: #A5F5C8; }
+        .diagnosis-kpi-change.down { color: #FFB4B4; }
+
+        /* ===== Section 2: Action Cards ===== */
+        .section-group { margin-bottom: 32px; }
+        .section-title {
+            font-size: 16px; font-weight: 700; color: var(--gray-800);
+            margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+        }
+        .section-title .icon {
+            width: 28px; height: 28px; background: var(--brand-bg); border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; font-size: 14px;
+        }
+        .section-subtitle { font-size: 12px; color: var(--gray-500); font-weight: 400; margin-left: 4px; }
+        .section-divider { border: none; border-top: 1px solid var(--gray-200); margin: 28px 0; }
+
+        /* Category filter tabs */
+        .category-tabs {
+            display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
+        }
+        .category-tab {
+            padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;
+            border: 1px solid var(--gray-300); background: white; color: var(--gray-600);
+            cursor: pointer; transition: all 0.2s;
+        }
+        .category-tab:hover { border-color: var(--brand-primary); color: var(--brand-primary); }
+        .category-tab.active { background: var(--brand-primary); color: white; border-color: var(--brand-primary); }
+
+        /* Action card */
+        .action-list { display: flex; flex-direction: column; gap: 16px; }
+        .action-card {
+            background: white; border-radius: var(--radius-lg); padding: 0;
+            box-shadow: var(--shadow-sm); overflow: hidden;
+            border-left: 4px solid var(--brand-primary);
+            transition: box-shadow 0.2s;
+        }
+        .action-card:hover { box-shadow: var(--shadow-md); }
+        .action-card.high { border-left-color: var(--accent-green); }
+        .action-card.medium { border-left-color: var(--accent-orange); }
+        .action-card.low { border-left-color: var(--accent-blue); }
+
+        .action-card-main { padding: 24px 28px; }
+        .action-card-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 12px; gap: 12px; flex-wrap: wrap;
+        }
+        .action-card-title-area { flex: 1; }
+        .action-card-badges { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+        .badge {
+            display: inline-block; padding: 3px 10px; border-radius: 20px;
+            font-size: 11px; font-weight: 600;
+        }
+        .badge-rec-high { background: #E8F5E9; color: var(--accent-green); }
+        .badge-rec-medium { background: #FFF3E0; color: var(--accent-orange); }
+        .badge-rec-low { background: #E3F2FD; color: var(--accent-blue); }
+        .badge-category { background: var(--brand-bg); color: var(--brand-primary); }
+
+        .action-card-title {
+            font-size: 18px; font-weight: 700; color: var(--gray-900); line-height: 1.4;
+        }
+
+        .action-why {
+            margin-top: 14px; margin-bottom: 16px;
+        }
+        .action-why-label {
+            font-size: 11px; font-weight: 700; color: var(--brand-primary);
+            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+        }
+        .action-why-list {
+            list-style: none; padding: 0;
+        }
+        .action-why-list li {
+            font-size: 13px; color: var(--gray-700); line-height: 1.7;
+            padding: 4px 0 4px 20px; position: relative;
+        }
+        .action-why-list li::before {
+            content: ''; position: absolute; left: 0; top: 11px;
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--brand-bg); border: 2px solid var(--brand-light);
+        }
+        .action-why-list li strong { color: var(--brand-primary); }
+        .action-why-list li .data-ref {
+            font-size: 10px; color: var(--gray-400); font-weight: 600;
+        }
+
+        .action-impact-row {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+            margin-top: 16px;
+        }
+        .action-impact-item {
+            background: var(--gray-50); border-radius: 8px; padding: 12px;
+            text-align: center;
+        }
+        .action-impact-item .label { font-size: 10px; color: var(--gray-500); font-weight: 600; text-transform: uppercase; }
+        .action-impact-item .value { font-size: 15px; font-weight: 700; color: var(--gray-800); margin-top: 2px; }
+
+        .action-card-actions {
+            display: flex; gap: 8px; padding: 16px 28px;
+            background: var(--gray-50); border-top: 1px solid var(--gray-200);
+        }
+        .btn {
+            padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
+            border: none; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-go { background: var(--accent-green); color: white; }
+        .btn-go:hover { background: #258756; }
+        .btn-hold { background: white; color: var(--gray-600); border: 1px solid var(--gray-300); }
+        .btn-hold:hover { border-color: var(--gray-400); }
+        .btn-reject { background: white; color: var(--gray-400); border: 1px solid var(--gray-200); }
+        .btn-reject:hover { color: var(--accent-red); border-color: var(--accent-red); }
+        .btn-detail { background: white; color: var(--brand-primary); border: 1px solid var(--brand-light); margin-left: auto; }
+        .btn-detail:hover { background: var(--brand-bg); }
+
+        /* Evidence panel (collapsible) */
+        .evidence-panel {
+            display: none; padding: 20px 28px; background: var(--gray-50);
+            border-top: 1px solid var(--gray-200);
+        }
+        .evidence-panel.open { display: block; }
+        .evidence-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .evidence-card {
+            background: white; border-radius: 8px; padding: 16px; box-shadow: var(--shadow-sm);
+        }
+        .evidence-card-title {
+            font-size: 11px; font-weight: 700; color: var(--gray-500);
+            text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 10px;
+        }
+        .evidence-chart { height: 160px; position: relative; }
+
+        /* ===== Section 3: Feedback Loop ===== */
+        .feedback-list { display: flex; flex-direction: column; gap: 12px; }
+        .feedback-card {
+            background: white; border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow-sm);
+            display: grid; grid-template-columns: 48px 1fr; gap: 16px;
+        }
+        .feedback-status {
+            width: 48px; height: 48px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; font-weight: 700;
+        }
+        .feedback-status.success { background: #E8F5E9; color: var(--accent-green); }
+        .feedback-status.partial { background: #FFF3E0; color: var(--accent-orange); }
+        .feedback-status.miss { background: #FFEBEE; color: var(--accent-red); }
+        .feedback-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+        .feedback-result { font-size: 13px; color: var(--gray-600); margin-bottom: 6px; }
+        .feedback-learning {
+            font-size: 12px; color: var(--brand-primary); background: var(--brand-bg);
+            padding: 8px 12px; border-radius: 6px; line-height: 1.6;
+        }
+
+        /* ===== Section 4: Data Explorer (collapsible) ===== */
+        .data-explorer-toggle {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 20px; background: white; border-radius: var(--radius);
+            box-shadow: var(--shadow-sm); cursor: pointer; transition: all 0.2s;
+            font-size: 14px; font-weight: 600; color: var(--gray-700);
+        }
+        .data-explorer-toggle:hover { box-shadow: var(--shadow-md); }
+        .data-explorer-toggle .chevron {
+            font-size: 18px; color: var(--gray-400); transition: transform 0.3s;
+        }
+        .data-explorer-toggle.open .chevron { transform: rotate(180deg); }
+        .data-explorer-content {
+            display: none; margin-top: 14px;
+        }
+        .data-explorer-content.open { display: block; }
+        .data-tabs {
+            display: flex; gap: 4px; margin-bottom: 14px; overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        .data-tab {
+            padding: 8px 16px; border-radius: 8px 8px 0 0; font-size: 12px; font-weight: 600;
+            border: 1px solid var(--gray-200); border-bottom: none;
+            background: white; color: var(--gray-500); cursor: pointer; white-space: nowrap;
+        }
+        .data-tab.active { background: var(--brand-primary); color: white; border-color: var(--brand-primary); }
+        .data-panel {
+            background: white; border-radius: 0 var(--radius) var(--radius) var(--radius);
+            padding: 24px; box-shadow: var(--shadow-sm);
+        }
+        .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .chart-container { position: relative; width: 100%; }
+        .chart-container.h200 { height: 200px; }
+        .chart-container.h240 { height: 240px; }
+        .card-title { font-size: 13px; font-weight: 700; color: var(--gray-700); margin-bottom: 14px; }
+
+        /* Funnel */
+        .funnel { display: flex; align-items: flex-end; gap: 4px; height: 200px; padding: 0 20px; }
+        .funnel-stage { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .funnel-bar-wrap { width: 100%; display: flex; flex-direction: column; align-items: center; flex: 1; justify-content: flex-end; }
+        .funnel-bar {
+            width: 80%; border-radius: 6px 6px 0 0; background: var(--brand-primary);
+            transition: height 0.5s; min-height: 4px;
+        }
+        .funnel-value { font-size: 14px; font-weight: 700; color: var(--gray-800); }
+        .funnel-label { font-size: 10px; color: var(--gray-500); text-align: center; font-weight: 600; }
+        .funnel-rate { font-size: 11px; color: var(--accent-green); font-weight: 700; }
+        .funnel-arrow {
+            font-size: 10px; color: var(--gray-400); text-align: center;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+            padding-bottom: 30px;
+        }
+        .funnel-arrow .rate { font-size: 11px; font-weight: 700; color: var(--accent-orange); }
+
+        /* Mini KPI inline */
+        .mini-kpis {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;
+        }
+        .mini-kpi {
+            background: white; border-radius: 8px; padding: 14px; box-shadow: var(--shadow-sm);
+            text-align: center;
+        }
+        .mini-kpi .label { font-size: 10px; color: var(--gray-500); font-weight: 600; text-transform: uppercase; }
+        .mini-kpi .value { font-size: 22px; font-weight: 700; color: var(--gray-800); }
+        .mini-kpi .change { font-size: 11px; font-weight: 600; }
+        .mini-kpi .change.up { color: var(--accent-green); }
+        .mini-kpi .change.down { color: var(--accent-red); }
+
+        /* Narrative pills */
+        .narrative-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+        .narrative-pill {
+            padding: 8px 16px; border-radius: 20px; font-size: 12px;
+            background: white; border: 1px solid var(--gray-200);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .narrative-pill .pct { font-weight: 700; color: var(--brand-primary); }
+        .narrative-pill .bar-bg {
+            width: 60px; height: 6px; background: var(--gray-200); border-radius: 3px; overflow: hidden;
+        }
+        .narrative-pill .bar-fill { height: 100%; background: var(--brand-primary); border-radius: 3px; }
+
+        /* Footer */
+        .footer { text-align: center; padding: 24px 0; font-size: 11px; color: var(--gray-400); }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .action-impact-row { grid-template-columns: repeat(2, 1fr); }
+            .evidence-grid { grid-template-columns: 1fr; }
+            .mini-kpis { grid-template-columns: repeat(2, 1fr); }
+            .chart-row { grid-template-columns: 1fr; }
+            .diagnosis-kpis { flex-direction: column; gap: 12px; }
+        }
+        @media (max-width: 600px) {
+            .dashboard { padding: 12px; }
+            .action-card-main { padding: 16px; }
+            .action-card-actions { padding: 12px 16px; }
+            .action-impact-row { grid-template-columns: 1fr 1fr; }
+        }
+        /* Portal Nav */
+        .portal-nav{position:fixed;top:0;left:0;right:0;z-index:9999;height:40px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(26,26,46,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.06)}
+        .portal-brand{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:#fff;letter-spacing:.03em;opacity:.7}
+        .portal-brand a{color:#fff;text-decoration:none}
+        .portal-links{display:flex;gap:20px}
+        .portal-links a{font-size:11px;color:#fff;text-decoration:none;opacity:.5;transition:opacity .2s;padding-bottom:2px}
+        .portal-links a:hover{opacity:1}
+        .portal-links a.active{opacity:1;color:#2d8f9e;border-bottom:2px solid #2d8f9e}
+    </style>
+</head>
+<body>
+<nav class="portal-nav">
+  <div class="portal-brand"><a href="/">note × StoryHub</a></div>
+  <div class="portal-links">
+    <a href="/">ポータル</a>
+    <a href="/market">市場レポート</a>
+    <a href="/category">カテゴリ</a>
+    <a href="/sofina" class="active">ソフィーナIP</a>
+  </div>
+</nav>
+<div class="dashboard" style="padding-top:48px;">
+
+    <!-- Header -->
+    <div class="dash-header">
+        <h1>SOFINA iP 施策ダッシュボード<span>AI-Driven Action Board</span></h1>
+        <div class="header-controls">
+            <span class="proto-badge">PROTOTYPE v2</span>
+            <select id="monthFilter">
+                <option value="2026-02">2026年2月</option>
+                <option value="2026-01">2026年1月</option>
+                <option value="2025-12">2025年12月</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- ===== 1. AI Diagnosis ===== -->
+    <div class="diagnosis-bar" id="diagnosisBar"></div>
+
+    <!-- ===== 2. AI-Recommended Actions ===== -->
+    <div class="section-group">
+        <div class="section-title">
+            <div class="icon">⚡</div>
+            AIが提案する今月の施策
+            <span class="section-subtitle">— データ根拠つき。Go / 保留 / 却下 で判断してください</span>
+        </div>
+        <div class="category-tabs" id="categoryTabs">
+            <div class="category-tab active" data-cat="all">すべて</div>
+            <div class="category-tab" data-cat="content">コンテンツ企画</div>
+            <div class="category-tab" data-cat="ugc">UGC施策</div>
+            <div class="category-tab" data-cat="promo">プロモーション</div>
+        </div>
+        <div class="action-list" id="actionList"></div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- ===== 3. Feedback Loop ===== -->
+    <div class="section-group">
+        <div class="section-title">
+            <div class="icon">🔄</div>
+            先月の施策 → 結果と学習
+            <span class="section-subtitle">— この学習を今月の提案に反映済み</span>
+        </div>
+        <div class="feedback-list" id="feedbackList"></div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- ===== 4. Data Explorer ===== -->
+    <div class="section-group">
+        <div class="data-explorer-toggle" id="explorerToggle" onclick="toggleExplorer()">
+            <span>根拠データを俯瞰する（14指標すべて）</span>
+            <span class="chevron">▼</span>
+        </div>
+        <div class="data-explorer-content" id="explorerContent">
+            <div class="mini-kpis" id="miniKpis"></div>
+            <div class="data-tabs" id="dataTabs">
+                <div class="data-tab active" data-panel="funnel">ファネル</div>
+                <div class="data-tab" data-panel="channel">流入チャネル</div>
+                <div class="data-tab" data-panel="quality">品質スコア</div>
+                <div class="data-tab" data-panel="brand">ブランドポジション</div>
+                <div class="data-tab" data-panel="narrative">UGCナラティブ</div>
+                <div class="data-tab" data-panel="follower">ファンベース</div>
+            </div>
+
+            <!-- Funnel panel -->
+            <div class="data-panel" id="panel-funnel">
+                <div class="card-title">読者アクションファネル — 表示 → 読了 → 完読 → スキ → フォロー</div>
+                <div class="funnel" id="funnelChart"></div>
+            </div>
+            <div class="data-panel" id="panel-channel" style="display:none;">
+                <div class="card-title">流入チャネルミックス</div>
+                <div class="chart-row">
+                    <div>
+                        <div class="chart-container h240"><canvas id="channelPieChart"></canvas></div>
+                    </div>
+                    <div>
+                        <div class="card-title" style="margin-top:0;">検索キーワード TOP 5 & LLM経由流入</div>
+                        <table style="width:100%;font-size:13px;border-collapse:collapse;" id="kwTable">
+                            <thead><tr style="border-bottom:2px solid var(--gray-200);">
+                                <th style="text-align:left;padding:8px;font-size:11px;color:var(--gray-500);">キーワード</th>
+                                <th style="text-align:right;padding:8px;font-size:11px;color:var(--gray-500);">流入PV</th>
+                                <th style="text-align:right;padding:8px;font-size:11px;color:var(--gray-500);">前月比</th>
+                            </tr></thead>
+                            <tbody></tbody>
+                        </table>
+                        <div style="margin-top:14px;padding:12px;background:var(--brand-bg);border-radius:8px;">
+                            <div style="font-size:11px;font-weight:700;color:var(--brand-primary);">LLM経由流入</div>
+                            <div id="llmStat" style="font-size:13px;margin-top:4px;color:var(--gray-700);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="data-panel" id="panel-quality" style="display:none;">
+                <div class="card-title">記事パフォーマンス・品質スコア & 成功パターン</div>
+                <div class="chart-row">
+                    <div>
+                        <div class="chart-container h240"><canvas id="qualityChart"></canvas></div>
+                    </div>
+                    <div>
+                        <div class="card-title" style="margin-top:0;">成功記事の共通特徴（上位 vs 下位）</div>
+                        <table style="width:100%;font-size:13px;border-collapse:collapse;" id="patternTable">
+                            <thead><tr style="border-bottom:2px solid var(--gray-200);">
+                                <th style="text-align:left;padding:8px;font-size:11px;color:var(--gray-500);">特徴量</th>
+                                <th style="text-align:center;padding:8px;font-size:11px;color:var(--accent-green);">上位記事</th>
+                                <th style="text-align:center;padding:8px;font-size:11px;color:var(--accent-red);">下位記事</th>
+                                <th style="text-align:right;padding:8px;font-size:11px;color:var(--gray-500);">相関</th>
+                            </tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="data-panel" id="panel-brand" style="display:none;">
+                <div class="card-title">テーマ市場インデックス & ブランド言及</div>
+                <div class="chart-row">
+                    <div>
+                        <div class="chart-container h240"><canvas id="themeMarketChart"></canvas></div>
+                    </div>
+                    <div>
+                        <div class="chart-container h240"><canvas id="brandMentionChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+            <div class="data-panel" id="panel-narrative" style="display:none;">
+                <div class="card-title">UGCナラティブ分析 — ユーザーはどうブランドを語っているか</div>
+                <div class="narrative-pills" id="narrativePills"></div>
+                <div style="margin-top:16px;padding:16px;background:var(--gray-50);border-radius:8px;">
+                    <div style="font-size:11px;font-weight:700;color:var(--brand-primary);margin-bottom:6px;">公式発信とのギャップ</div>
+                    <div id="narrativeGap" style="font-size:13px;color:var(--gray-700);line-height:1.8;"></div>
+                </div>
+            </div>
+            <div class="data-panel" id="panel-follower" style="display:none;">
+                <div class="card-title">フォロワー成長 & 読者関心プロファイル</div>
+                <div class="chart-row">
+                    <div>
+                        <div class="chart-container h240"><canvas id="followerGrowthChart"></canvas></div>
+                    </div>
+                    <div>
+                        <div class="chart-container h240"><canvas id="interestProfileChart"></canvas></div>
+                    </div>
+                </div>
+                <div style="margin-top:14px;padding:12px;background:var(--brand-bg);border-radius:8px;">
+                    <div style="font-size:11px;font-weight:700;color:var(--brand-primary);">コホート定着率</div>
+                    <div id="cohortStat" style="font-size:13px;margin-top:4px;color:var(--gray-700);"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        SOFINA iP × note 施策ドリブン・ダッシュボード v2.0 — Prototype with Sample Data
+    </div>
+</div>
+
+<script>
+// ============================================
+// DATA
+// ============================================
+
+const MONTH_DATA = {
+    '2026-02': {
+        // Diagnosis
+        diagnosisTitle: '読了率は高水準だが、フォロー転換が最大のボトルネック',
+        diagnosisSub: 'コンテンツの質は十分（完読率<strong>42%</strong>、カテゴリ平均の1.4倍）。しかし完読→スキの転換率<strong>18%</strong>に対し、スキ→フォローは<strong>4.2%</strong>と極端に低い。「読んで満足して去る」状態。施策の焦点は<strong>アクション導線の設計</strong>に絞るべき月。',
+        kpis: [
+            { label: 'PV', value: '124,500', change: '+15.1%', up: true },
+            { label: 'エンゲージメント', value: '72/100', change: '+6pt', up: true },
+            { label: 'フォロワー純増', value: '+380', change: '+12%', up: true },
+            { label: 'AIO適格率', value: '34%', change: '+8pt', up: true }
+        ],
+
+        // Actions
+        actions: [
+            {
+                id: 'a1', rec: 'high', category: 'ugc',
+                title: '「30代ママ×セラミド」体験談UGCコンテスト',
+                why: [
+                    { text: '読者関心プロファイル: 子育て層が<strong>32%</strong>で最大セグメント', ref: '#10' },
+                    { text: 'UGCナラティブ: 「子どもに安心」文脈が<strong>18%</strong>で3位 — 公式発信にはゼロ', ref: '#13' },
+                    { text: 'テーマ市場: 「敏感肌×子ども」が前月比<strong>+28%</strong>で急成長中', ref: '#11' },
+                    { text: '成功パターン: 体験談形式の完読率が他形式より<strong>+15pt</strong>高い', ref: '#6' }
+                ],
+                impact: [
+                    { label: '想定投稿数', value: '80〜120件' },
+                    { label: '想定リーチ', value: '40,000〜60,000' },
+                    { label: 'フォロワー純増', value: '+200〜350' },
+                    { label: '必要コスト', value: '¥300,000' }
+                ]
+            },
+            {
+                id: 'a2', rec: 'high', category: 'content',
+                title: '「土台美容×エイジング」皮膚科医監修3回連載',
+                why: [
+                    { text: 'テーマ市場: エイジングケア文脈のPV需給比が<strong>2.8</strong>（供給不足）', ref: '#11' },
+                    { text: 'ファネル分析: 30代後半読者の完読→スキ転換率が全体平均の<strong>1.8倍</strong>', ref: '#9' },
+                    { text: '検索/AIO: 「セラミド エイジング」のAIO適格度が<strong>4/5</strong>で検索資産化の余地大', ref: '#14' },
+                    { text: 'フォロワー成長: 30代後半コホートの90日定着率が<strong>68%</strong>で最高', ref: '#8' }
+                ],
+                impact: [
+                    { label: '想定PV（3本計）', value: '25,000〜35,000' },
+                    { label: 'AIO引用可能性', value: '高' },
+                    { label: 'フォロワー純増', value: '+150〜250' },
+                    { label: '必要コスト', value: '¥900,000' }
+                ]
+            },
+            {
+                id: 'a3', rec: 'high', category: 'promo',
+                title: 'note内「敏感肌ケア」セクション広告 × 公式記事ブースト',
+                why: [
+                    { text: '流入チャネル: note内レコメンド経由のCTRが<strong>3.2%</strong>で最高効率', ref: '#7' },
+                    { text: 'ブランド言及: 「敏感肌ケア」セクション内の自社シェアは<strong>28%</strong>で1位だが認知にムラ', ref: '#12' },
+                    { text: 'コメント感情: 敏感肌文脈のP/N比が<strong>8.5</strong>で全文脈中最高 — 広告との親和性高', ref: '#4' },
+                    { text: '読了深度: プロモ経由記事の読了率は自然流入の<strong>0.7倍</strong> — 記事選定が鍵', ref: '#2' }
+                ],
+                impact: [
+                    { label: '想定追加PV', value: '15,000〜25,000' },
+                    { label: '想定CPR', value: '¥18〜24' },
+                    { label: '露出期間', value: '2週間' },
+                    { label: '必要コスト', value: '¥500,000' }
+                ]
+            },
+            {
+                id: 'a4', rec: 'medium', category: 'content',
+                title: '「メンズ×土台美容」探索的タイアップ（1本）',
+                why: [
+                    { text: 'テーマ市場: メンズスキンケア関連記事が前月比<strong>+42%</strong>で急成長', ref: '#11' },
+                    { text: 'ブランド言及: メンズ文脈でのセラミド訴求ブランドは<strong>ゼロ</strong>（空白市場）', ref: '#12' },
+                    { text: '成功パターン: 「性別を問わない」切り口の記事は通常の<strong>1.3倍</strong>のシェア率', ref: '#6' }
+                ],
+                impact: [
+                    { label: '想定PV', value: '15,000〜20,000' },
+                    { label: '新規層獲得', value: '中' },
+                    { label: 'リスク', value: '低（1本探索）' },
+                    { label: '必要コスト', value: '¥400,000' }
+                ]
+            },
+            {
+                id: 'a5', rec: 'medium', category: 'ugc',
+                title: '#全身土台ケア ヘアケアブランド共同UGCキャンペーン',
+                why: [
+                    { text: '読者関心: 読者の回遊先で「ヘアケア」が<strong>41%</strong>（カテゴリ平均22%の1.9倍）', ref: '#10' },
+                    { text: 'UGCナラティブ: 「頭皮ケアにも使える」系の自発UGCが前月比<strong>+15%</strong>', ref: '#13' },
+                    { text: 'エンゲージメント: クロスカテゴリUGCのスコアは単独テーマの<strong>1.4倍</strong>', ref: '#3' }
+                ],
+                impact: [
+                    { label: '想定PV', value: '30,000〜50,000' },
+                    { label: '共同リーチ', value: '両ブランド計' },
+                    { label: 'フォロワー純増', value: '+300〜500' },
+                    { label: '必要コスト', value: '¥600,000' }
+                ]
+            },
+            {
+                id: 'a6', rec: 'low', category: 'promo',
+                title: 'Google検索連動 — AIO引用最適化済み記事のSEOブースト',
+                why: [
+                    { text: '検索/AIO: AIO適格度4以上の既存記事が<strong>8本</strong>あるがGoogle流入は月<strong>2,400PV</strong>のみ', ref: '#14' },
+                    { text: '流入チャネル: LLM経由流入が前月比<strong>+35%</strong>で成長中だが絶対数は小さい', ref: '#7' },
+                    { text: '品質スコア: AIO適格記事の品質スコア平均は<strong>78/100</strong>で上位20%圏', ref: '#5' }
+                ],
+                impact: [
+                    { label: '想定追加PV', value: '5,000〜8,000' },
+                    { label: 'LLM引用確率', value: '向上' },
+                    { label: '長期効果', value: '高' },
+                    { label: '必要コスト', value: '¥200,000' }
+                ]
+            }
+        ],
+
+        // Feedback from last month
+        feedback: [
+            {
+                status: 'success', icon: '✓',
+                title: '#土台美容チャレンジ キャンペーン',
+                result: 'PV 15,800（想定 15,000〜20,000 → 想定内） / スキ 523',
+                learning: '学習: 投稿テンプレを提供した参加者の読了率が未提供者の1.4倍。次回UGC施策ではテンプレ同梱を標準化 → 施策#1に反映済み'
+            },
+            {
+                status: 'partial', icon: '△',
+                title: 'エイジングケアタイアップ記事',
+                result: 'PV 6,700（想定 10,000〜15,000 → 想定の60%） / 読了率72%は高水準',
+                learning: '学習: 流入の72%がフォロワー経由。新規獲得には検索KW設計が必要 → 施策#2のAIO適格度重視に反映済み'
+            },
+            {
+                status: 'success', icon: '✓',
+                title: '公式投稿「開発者が語るセラミドへのこだわり」',
+                result: 'PV 9,800 / 読了率75%（月間最高） / フォロー転換率 6.1%',
+                learning: '学習: 開発者の一人称語りは読了率・フォロー転換ともに最高。「人」が見える記事は信頼→フォローの転換に効く → 施策#2の監修者前面化に反映済み'
+            }
+        ],
+
+        // Data Explorer
+        funnel: [
+            { label: '表示', value: 124500, rate: null },
+            { label: '25%読了', value: 74700, rate: '60%' },
+            { label: '完読', value: 52290, rate: '70%' },
+            { label: 'スキ', value: 9413, rate: '18%' },
+            { label: 'フォロー', value: 395, rate: '4.2%' }
+        ],
+        channels: {
+            labels: ['note内回遊', 'Google検索', 'SNS', 'ダイレクト', 'LLM経由', 'その他'],
+            data: [38, 24, 18, 12, 5, 3]
+        },
+        keywords: [
+            { kw: 'セラミド 美容液', pv: 4200, change: '+12%' },
+            { kw: '土台美容 やり方', pv: 3100, change: '+28%' },
+            { kw: '敏感肌 セラミド おすすめ', pv: 2800, change: '+8%' },
+            { kw: 'ソフィーナiP 口コミ', pv: 1900, change: '+5%' },
+            { kw: 'セラミド 効果', pv: 1600, change: '-3%' }
+        ],
+        llmStat: 'LLM経由: <strong>6,225 PV</strong>（全体の5.0%） / 前月比 <strong>+35%</strong> / ChatGPT 58%、Perplexity 24%、AI Overview 18%',
+        qualityScores: {
+            labels: ['開発者語り', 'セラミド×バリア', 'ベスコスUGC', '冬の土台美容PR', '土台チャレンジ', 'エイジング30代', 'セラミドTOP5', '保湿ケアPR'],
+            scores: [88, 82, 79, 72, 68, 65, 58, 52],
+            pvContrib: [18, 22, 28, 25, 15, 12, 32, 20],
+            readContrib: [35, 30, 28, 22, 20, 30, 18, 16],
+            engContrib: [35, 30, 23, 25, 33, 23, 8, 16]
+        },
+        successPattern: [
+            { feature: 'テーマ', top: '体験談・開発秘話', bottom: '成分比較・ランキング', corr: '0.72' },
+            { feature: '主語', top: '一人称（私/開発者）', bottom: '三人称（ブランド）', corr: '0.68' },
+            { feature: '文字数', top: '2,500〜3,500字', bottom: '4,500字以上', corr: '0.61' },
+            { feature: '構成', top: 'ストーリー型', bottom: 'リスト型', corr: '0.58' },
+            { feature: '公開曜日', top: '火・木', bottom: '月・土', corr: '0.42' },
+            { feature: '画像数', top: '5〜8枚', bottom: '2枚以下', corr: '0.39' }
+        ],
+        themeMarket: {
+            labels: ['土台美容', '敏感肌ケア', 'エイジングケア', '保湿・乾燥', 'メンズスキンケア', 'インナーケア'],
+            demandSupply: [3.2, 2.1, 2.8, 1.5, 4.1, 3.5],
+            selfShare: [32, 28, 8, 18, 0, 2]
+        },
+        brandMention: {
+            labels: ['SOFINA iP', 'ブランドA', 'ブランドB', 'ブランドC', 'ブランドD'],
+            mentions: [38, 52, 45, 28, 22],
+            readRate: [68, 55, 48, 52, 45],
+            pnRatio: [6.2, 4.8, 3.5, 5.1, 3.2]
+        },
+        narratives: [
+            { type: '信頼の定番', pct: 32 },
+            { type: 'レシピ中の言及', pct: 24 },
+            { type: '子どもに安心', pct: 18 },
+            { type: '敏感肌の救世主', pct: 14 },
+            { type: 'コスパ評価', pct: 8 },
+            { type: 'その他', pct: 4 }
+        ],
+        narrativeGapText: '公式発信は「土台美容」「サイエンス」を軸にしているが、UGCでは<strong>「子どもに安心」（18%）</strong>と<strong>「レシピ中の言及」（24%）</strong>が大きな比率を占める。特に「レシピ中の言及」は公式には全くない文脈で、料理中のハンドケア→顔のセラミドケアという独自の文脈連鎖が生まれている。<br><br>ギャップスコア: <strong>0.68</strong>（1.0で完全不一致）— 公式とUGCの語り方に大きな乖離があり、UGCの文脈を公式に取り込む余地が大きい。',
+        followerGrowth: {
+            labels: ['9月','10月','11月','12月','1月','2月'],
+            net: [180, 220, 250, 310, 340, 380],
+            total: [4200, 4420, 4670, 4980, 5320, 5700]
+        },
+        interestProfile: {
+            labels: ['スキンケア', '子育て・育児', 'ヘアケア', '健康食品', 'メイク', 'ライフスタイル'],
+            data: [85, 32, 41, 29, 52, 28],
+            targetMatch: 72
+        },
+        cohortStat: '30日定着率: <strong>62%</strong>（カテゴリ平均 45%） / 90日定着率: <strong>48%</strong>（カテゴリ平均 28%） — 定着率はカテゴリ上位。ただし純増の68%がコンテスト起点のため、コンテスト非開催月の純増が課題。',
+        sentiment: {
+            pnRatio: 6.2,
+            categories: { '感謝・共感': 45, '質問・深掘り': 28, 'ニュートラル': 18, 'ネガティブ': 9 }
+        }
+    }
+};
+
+// Use Feb data as default for other months (simplified for prototype)
+MONTH_DATA['2026-01'] = MONTH_DATA['2026-02'];
+MONTH_DATA['2025-12'] = MONTH_DATA['2026-02'];
+
+// ============================================
+// RENDER
+// ============================================
+let chartInstances = {};
+function destroyChart(id) { if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; } }
+function fmt(n) { return typeof n === 'number' ? n.toLocaleString() : n; }
+
+// 1. Diagnosis
+function renderDiagnosis(month) {
+    const d = MONTH_DATA[month];
+    document.getElementById('diagnosisBar').innerHTML = `
+        <div class="diagnosis-label">AI DIAGNOSIS — ${month}</div>
+        <div class="diagnosis-text">${d.diagnosisTitle}</div>
+        <div class="diagnosis-sub">${d.diagnosisSub}</div>
+        <div class="diagnosis-kpis">
+            ${d.kpis.map(k => `
+                <div class="diagnosis-kpi">
+                    <div class="diagnosis-kpi-value">${k.value}</div>
+                    <div class="diagnosis-kpi-label">${k.label}</div>
+                    <div class="diagnosis-kpi-change ${k.up ? 'up' : 'down'}">${k.up ? '↑' : '↓'} ${k.change}</div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+// 2. Action Cards
+function renderActions(month, filter) {
+    const d = MONTH_DATA[month];
+    const filtered = filter === 'all' ? d.actions : d.actions.filter(a => a.category === filter);
+    const recLabel = { high: '推奨度: 高', medium: '推奨度: 中', low: '推奨度: 低' };
+    const recBadge = { high: 'badge-rec-high', medium: 'badge-rec-medium', low: 'badge-rec-low' };
+    const catLabel = { content: 'コンテンツ企画', ugc: 'UGC施策', promo: 'プロモーション' };
+
+    document.getElementById('actionList').innerHTML = filtered.map(a => `
+        <div class="action-card ${a.rec}" id="card-${a.id}">
+            <div class="action-card-main">
+                <div class="action-card-header">
+                    <div class="action-card-title-area">
+                        <div class="action-card-title">${a.title}</div>
+                    </div>
+                    <div class="action-card-badges">
+                        <span class="badge ${recBadge[a.rec]}">${recLabel[a.rec]}</span>
+                        <span class="badge badge-category">${catLabel[a.category]}</span>
+                    </div>
+                </div>
+                <div class="action-why">
+                    <div class="action-why-label">なぜ今やるべきか</div>
+                    <ul class="action-why-list">
+                        ${a.why.map(w => `<li>${w.text} <span class="data-ref">${w.ref}</span></li>`).join('')}
+                    </ul>
+                </div>
+                <div class="action-impact-row">
+                    ${a.impact.map(i => `
+                        <div class="action-impact-item">
+                            <div class="label">${i.label}</div>
+                            <div class="value">${i.value}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            <div class="action-card-actions">
+                <button class="btn btn-go" onclick="decide('${a.id}','go')">▶ やる</button>
+                <button class="btn btn-hold" onclick="decide('${a.id}','hold')">⏸ 保留</button>
+                <button class="btn btn-reject" onclick="decide('${a.id}','reject')">✕ 却下</button>
+                <button class="btn btn-detail" onclick="toggleEvidence('${a.id}')">📊 根拠詳細</button>
+            </div>
+            <div class="evidence-panel" id="evidence-${a.id}">
+                <div style="font-size:13px;color:var(--gray-600);line-height:1.8;padding:8px 0;">
+                    この施策の根拠となるデータは、下部の「根拠データを俯瞰する」セクションで確認できます。<br>
+                    参照データ: ${a.why.map(w => '<strong>' + w.ref + '</strong>').join(' / ')}
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function decide(id, action) {
+    const card = document.getElementById('card-' + id);
+    const labels = { go: '✅ 実施決定', hold: '⏸ 保留中', reject: '✕ 却下済み' };
+    const colors = { go: '#E8F5E9', hold: '#FFF3E0', reject: '#FFEBEE' };
+    card.style.opacity = action === 'reject' ? '0.5' : '1';
+    card.querySelector('.action-card-actions').innerHTML = `
+        <div style="padding:4px 0;font-size:13px;font-weight:600;color:var(--gray-600);">
+            ${labels[action]}
+            <button class="btn btn-hold" onclick="renderActions(document.getElementById('monthFilter').value, currentFilter)" style="margin-left:12px;font-size:11px;">元に戻す</button>
+        </div>
+    `;
+}
+
+function toggleEvidence(id) {
+    const panel = document.getElementById('evidence-' + id);
+    panel.classList.toggle('open');
+}
+
+// 3. Feedback
+function renderFeedback(month) {
+    const d = MONTH_DATA[month];
+    document.getElementById('feedbackList').innerHTML = d.feedback.map(f => `
+        <div class="feedback-card">
+            <div class="feedback-status ${f.status}">${f.icon}</div>
+            <div>
+                <div class="feedback-title">${f.title}</div>
+                <div class="feedback-result">${f.result}</div>
+                <div class="feedback-learning">${f.learning}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// 4. Data Explorer
+function toggleExplorer() {
+    const toggle = document.getElementById('explorerToggle');
+    const content = document.getElementById('explorerContent');
+    toggle.classList.toggle('open');
+    content.classList.toggle('open');
+    if (content.classList.contains('open')) {
+        renderDataExplorer(document.getElementById('monthFilter').value);
+    }
+}
+
+function renderDataExplorer(month) {
+    const d = MONTH_DATA[month];
+    renderMiniKpis(d);
+    renderFunnel(d);
+    renderChannelChart(d);
+    renderKwTable(d);
+    renderQualityChart(d);
+    renderPatternTable(d);
+    renderThemeMarketChart(d);
+    renderBrandMentionChart(d);
+    renderNarrativePills(d);
+    renderFollowerGrowthChart(d);
+    renderInterestProfileChart(d);
+}
+
+function renderMiniKpis(d) {
+    const items = [
+        { label: '月間PV', value: '124,500', change: '+15.1%', up: true },
+        { label: '完読率', value: '42%', change: '+3pt', up: true },
+        { label: 'P/N比', value: '6.2', change: '+0.4', up: true },
+        { label: 'ターゲット合致度', value: '72%', change: '+5pt', up: true }
+    ];
+    document.getElementById('miniKpis').innerHTML = items.map(k => `
+        <div class="mini-kpi">
+            <div class="label">${k.label}</div>
+            <div class="value">${k.value}</div>
+            <div class="change ${k.up ? 'up' : 'down'}">${k.up ? '↑' : '↓'} ${k.change}</div>
+        </div>
+    `).join('');
+}
+
+function renderFunnel(d) {
+    const maxVal = d.funnel[0].value;
+    let html = '';
+    d.funnel.forEach((stage, i) => {
+        const height = Math.max(10, (stage.value / maxVal) * 160);
+        const opacity = 1 - (i * 0.15);
+        html += `<div class="funnel-stage">
+            <div class="funnel-value">${fmt(stage.value)}</div>
+            <div class="funnel-bar-wrap">
+                <div class="funnel-bar" style="height:${height}px;opacity:${opacity};"></div>
+            </div>
+            <div class="funnel-label">${stage.label}</div>
+        </div>`;
+        if (i < d.funnel.length - 1) {
+            html += `<div class="funnel-arrow">
+                <div class="rate">${d.funnel[i+1].rate}</div>
+                <div>→</div>
+            </div>`;
+        }
+    });
+    document.getElementById('funnelChart').innerHTML = html;
+}
+
+function renderChannelChart(d) {
+    destroyChart('channelPieChart');
+    const ctx = document.getElementById('channelPieChart').getContext('2d');
+    const colors = ['#6B4C8A','#4A8FD6','#E8943A','#2E9E6B','#D94F4F','#BDBDBD'];
+    chartInstances.channelPieChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: { labels: d.channels.labels, datasets: [{ data: d.channels.data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { usePointStyle: true, padding: 10, font: { size: 11 } } } } }
+    });
+}
+
+function renderKwTable(d) {
+    const tbody = document.querySelector('#kwTable tbody');
+    tbody.innerHTML = d.keywords.map(k => `
+        <tr>
+            <td style="padding:8px;font-size:13px;">${k.kw}</td>
+            <td style="padding:8px;text-align:right;font-weight:600;">${fmt(k.pv)}</td>
+            <td style="padding:8px;text-align:right;color:${k.change.startsWith('+') ? 'var(--accent-green)' : 'var(--accent-red)'};font-weight:600;">${k.change}</td>
+        </tr>
+    `).join('');
+    document.getElementById('llmStat').innerHTML = d.llmStat;
+}
+
+function renderQualityChart(d) {
+    destroyChart('qualityChart');
+    const ctx = document.getElementById('qualityChart').getContext('2d');
+    chartInstances.qualityChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: d.qualityScores.labels,
+            datasets: [{ label: '品質スコア', data: d.qualityScores.scores, backgroundColor: d.qualityScores.scores.map(s => s >= 70 ? 'rgba(46,158,107,0.7)' : s >= 50 ? 'rgba(232,148,58,0.7)' : 'rgba(217,79,79,0.7)'), borderRadius: 4 }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+            plugins: { legend: { display: false } },
+            scales: { x: { max: 100, ticks: { font: { size: 10 } }, grid: { color: '#f0f0f0' } }, y: { ticks: { font: { size: 10 } }, grid: { display: false } } }
+        }
+    });
+}
+
+function renderPatternTable(d) {
+    const tbody = document.querySelector('#patternTable tbody');
+    tbody.innerHTML = d.successPattern.map(p => `
+        <tr style="border-bottom:1px solid var(--gray-100);">
+            <td style="padding:8px;font-weight:600;font-size:12px;">${p.feature}</td>
+            <td style="padding:8px;text-align:center;font-size:12px;color:var(--accent-green);">${p.top}</td>
+            <td style="padding:8px;text-align:center;font-size:12px;color:var(--accent-red);">${p.bottom}</td>
+            <td style="padding:8px;text-align:right;font-size:12px;font-weight:600;">${p.corr}</td>
+        </tr>
+    `).join('');
+}
+
+function renderThemeMarketChart(d) {
+    destroyChart('themeMarketChart');
+    const ctx = document.getElementById('themeMarketChart').getContext('2d');
+    chartInstances.themeMarketChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: d.themeMarket.labels,
+            datasets: [
+                { label: 'PV需給比', data: d.themeMarket.demandSupply, backgroundColor: 'rgba(107,76,138,0.7)', borderRadius: 4, yAxisID: 'y' },
+                { label: '自社シェア(%)', data: d.themeMarket.selfShare, type: 'line', borderColor: '#E8943A', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 5, pointBackgroundColor: '#E8943A', yAxisID: 'y1' }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } } },
+            scales: {
+                y: { ticks: { font: { size: 10 } }, grid: { color: '#f0f0f0' }, title: { display: true, text: '需給比', font: { size: 10 } } },
+                y1: { position: 'right', ticks: { callback: v => v + '%', font: { size: 10 } }, grid: { display: false }, title: { display: true, text: '自社シェア', font: { size: 10 } } },
+                x: { ticks: { font: { size: 10 } }, grid: { display: false } }
+            }
+        }
+    });
+}
+
+function renderBrandMentionChart(d) {
+    destroyChart('brandMentionChart');
+    const ctx = document.getElementById('brandMentionChart').getContext('2d');
+    const colors = d.brandMention.labels.map((l,i) => i === 0 ? 'rgba(107,76,138,0.8)' : 'rgba(189,189,189,0.5)');
+    chartInstances.brandMentionChart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: d.brandMention.labels.map((label, i) => ({
+                label: label,
+                data: [{ x: d.brandMention.mentions[i], y: d.brandMention.readRate[i] }],
+                backgroundColor: colors[i],
+                pointRadius: Math.max(8, d.brandMention.pnRatio[i] * 3),
+                pointHoverRadius: 14
+            }))
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 10, font: { size: 10 } } },
+                tooltip: { callbacks: { label: ctx => [ctx.dataset.label, '言及数: ' + ctx.parsed.x, '読了率: ' + ctx.parsed.y + '%'] } } },
+            scales: {
+                x: { title: { display: true, text: '月間言及記事数', font: { size: 10 } }, ticks: { font: { size: 10 } }, grid: { color: '#f0f0f0' } },
+                y: { title: { display: true, text: '平均読了率(%)', font: { size: 10 } }, ticks: { font: { size: 10 } }, grid: { color: '#f0f0f0' } }
+            }
+        }
+    });
+}
+
+function renderNarrativePills(d) {
+    document.getElementById('narrativePills').innerHTML = d.narratives.map(n => `
+        <div class="narrative-pill">
+            <span>${n.type}</span>
+            <span class="pct">${n.pct}%</span>
+            <span class="bar-bg"><span class="bar-fill" style="width:${n.pct * 2.5}%;"></span></span>
+        </div>
+    `).join('');
+    document.getElementById('narrativeGap').innerHTML = d.narrativeGapText;
+}
+
+function renderFollowerGrowthChart(d) {
+    destroyChart('followerGrowthChart');
+    const ctx = document.getElementById('followerGrowthChart').getContext('2d');
+    chartInstances.followerGrowthChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: d.followerGrowth.labels,
+            datasets: [
+                { label: '純増数', data: d.followerGrowth.net, backgroundColor: 'rgba(107,76,138,0.7)', borderRadius: 4, yAxisID: 'y' },
+                { label: '累計フォロワー', data: d.followerGrowth.total, type: 'line', borderColor: '#2E9E6B', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 4, yAxisID: 'y1' }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 12, font: { size: 11 } } } },
+            scales: {
+                y: { ticks: { font: { size: 10 } }, grid: { color: '#f0f0f0' }, title: { display: true, text: '純増', font: { size: 10 } } },
+                y1: { position: 'right', ticks: { font: { size: 10 } }, grid: { display: false }, title: { display: true, text: '累計', font: { size: 10 } } },
+                x: { ticks: { font: { size: 10 } }, grid: { display: false } }
+            }
+        }
+    });
+}
+
+function renderInterestProfileChart(d) {
+    destroyChart('interestProfileChart');
+    const ctx = document.getElementById('interestProfileChart').getContext('2d');
+    chartInstances.interestProfileChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: d.interestProfile.labels,
+            datasets: [{
+                label: '読者関心度(%)',
+                data: d.interestProfile.data,
+                backgroundColor: 'rgba(107,76,138,0.15)',
+                borderColor: '#6B4C8A',
+                borderWidth: 2,
+                pointBackgroundColor: '#6B4C8A',
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { r: { beginAtZero: true, max: 100, ticks: { font: { size: 9 }, stepSize: 25 }, pointLabels: { font: { size: 10 } } } }
+        }
+    });
+    document.getElementById('cohortStat').innerHTML = d.cohortStat;
+}
+
+// Tab switching
+let currentFilter = 'all';
+document.getElementById('categoryTabs').addEventListener('click', function(e) {
+    if (e.target.classList.contains('category-tab')) {
+        document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+        e.target.classList.add('active');
+        currentFilter = e.target.dataset.cat;
+        renderActions(document.getElementById('monthFilter').value, currentFilter);
+    }
+});
+
+document.getElementById('dataTabs').addEventListener('click', function(e) {
+    if (e.target.classList.contains('data-tab')) {
+        document.querySelectorAll('.data-tab').forEach(t => t.classList.remove('active'));
+        e.target.classList.add('active');
+        const panel = e.target.dataset.panel;
+        document.querySelectorAll('.data-panel').forEach(p => p.style.display = 'none');
+        document.getElementById('panel-' + panel).style.display = 'block';
+    }
+});
+
+// Month filter
+document.getElementById('monthFilter').addEventListener('change', function() {
+    const month = this.value;
+    renderDiagnosis(month);
+    renderActions(month, currentFilter);
+    renderFeedback(month);
+    if (document.getElementById('explorerContent').classList.contains('open')) {
+        renderDataExplorer(month);
+    }
+});
+
+// Init
+function init() {
+    const month = '2026-02';
+    renderDiagnosis(month);
+    renderActions(month, 'all');
+    renderFeedback(month);
+}
+init();
+</script>
+</body>
+</html>
