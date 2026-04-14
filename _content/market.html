@@ -625,49 +625,55 @@ body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#1a1a2e;color:va
         <div class="kpi"><div class="kpi-val" style="color:var(--o);">+300%</div><div class="kpi-label">PDRN検索成長率</div></div>
         <div class="kpi"><div class="kpi-val" style="color:var(--a);">+45%</div><div class="kpi-label">LLM流入成長</div></div>
     </div>
-    <div class="src">Source: 富士経済 2025 / Google Trends推定</div>
+    <div class="src">Source: 市場規模=富士経済 2025年7月 / 検索成長率=業界報道からの推定</div>
 </div>
 </div>
 
-<!-- ========== PAGE 19: Trend Direction by Sub-category ========== -->
+<!-- ========== PAGE 19: External Growth by Sub-category ========== -->
 <div class="slide bg-white">
 <div class="s-inner">
-    <div class="s-label" style="color:var(--a);">17 — Trend Direction</div>
-    <div class="s-title" style="font-size:28px;margin-bottom:8px;">成長の方向性：noteと外部で一致しているか</div>
+    <div class="s-label" style="color:var(--a);">17 — External Growth Rates</div>
+    <div class="s-title" style="font-size:28px;margin-bottom:8px;">サブカテゴリ別：外部市場の成長率</div>
     <div class="two-col wide-right">
         <div class="col">
+            <div class="s-body" style="font-size:13px;line-height:1.9;margin-bottom:16px;">各サブカテゴリの外部成長率を一覧化。<strong style="color:var(--a);">note側のデータは今後API連携で取得し、並列表示する予定。</strong></div>
             <div class="insight-cards">
-                <div class="i-card"><div class="num" style="color:var(--a);">↑↑</div><div class="text">メンズ：noteも外部も急成長。noteで特に読まれるテーマ</div></div>
-                <div class="i-card"><div class="num" style="color:var(--r);">→↑</div><div class="text">K-beauty：外部は急成長だがnoteでは伸び鈍い → 取りこぼし候補</div></div>
-                <div class="i-card"><div class="num" style="color:var(--a);">↑→</div><div class="text">成分解説：noteの方が先に伸びている → 長文テキストの強み</div></div>
+                <div class="i-card"><div class="text" style="font-size:12px;line-height:1.8;"><strong>指標の出典</strong><br>売上成長率: 富士経済・矢野経済<br>検索成長率: Google Trends推定<br>グローバルCAGR: IMARC・Euromonitor</div></div>
             </div>
         </div>
         <div class="col"><div class="chart-area"><canvas id="c_subcatgap"></canvas></div></div>
     </div>
-    <div class="src">Source: 富士経済, 矢野経済, Euromonitor / note中間データ（※note値はサンプル）</div>
+    <div class="src">Source: 各バーに対応する出典は左記参照</div>
 </div>
 </div>
 
-<!-- ========== PAGE 20: Trend Ranking ========== -->
+<!-- ========== PAGE 20: Analysis Approach ========== -->
 <div class="slide bg-dark">
-<div class="s-inner">
-    <div class="s-label">18 — Trend Ranking</div>
-    <div class="s-title" style="font-size:28px;margin-bottom:4px;">トレンドランキング：note vs 外部</div>
-    <div class="s-subtitle" style="font-size:14px;">同じテーマの人気順位がどれだけズレているか</div>
-    <div class="two-col wide-right">
-        <div class="col">
-            <div class="insight-cards">
-                <div class="i-card"><div class="text" style="font-size:12px;line-height:1.8;"><strong style="color:#dc2626;">外部で上位 / noteで下位</strong><br>日焼け止め・PDRN・K-beauty<br>→ コンテンツ投下の優先候補</div></div>
-                <div class="i-card"><div class="text" style="font-size:12px;line-height:1.8;"><strong style="color:#7dd3c0;">noteが外部より上位</strong><br>メンズ・成分解説・ルーティン<br>→ noteの強み</div></div>
-            </div>
+<div class="s-inner" style="max-width:900px;">
+    <div class="s-label">18 — Analysis Approach</div>
+    <div class="s-title" style="font-size:28px;margin-bottom:16px;">外部データ連携で実現できること</div>
+    <div class="s-body" style="font-size:14px;line-height:2.2;margin-bottom:24px;">Google Trends等の外部APIとnote中間データを月次で突合し、以下の3つの分析を自動化します。</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+        <div style="padding:24px;background:rgba(255,255,255,.06);border-radius:14px;border-top:3px solid #2d8f9e;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px;opacity:.6;">分析1</div>
+            <h4 style="font-size:16px;font-weight:700;margin-bottom:8px;">ランキング順位比較</h4>
+            <p style="font-size:12px;opacity:.7;line-height:1.7;">Google検索とnoteで人気テーマの順位を並べ、ズレを可視化。noteの強み・取りこぼしが一目でわかる。</p>
+            <div style="margin-top:12px;font-size:11px;opacity:.4;">データ: Google Trends API + note PVランキング</div>
         </div>
-        <div class="col"><div class="chart-area" style="min-height:380px;"><canvas id="c_gapmatrix"></canvas></div></div>
+        <div style="padding:24px;background:rgba(255,255,255,.06);border-radius:14px;border-top:3px solid #c4845e;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px;opacity:.6;">分析2</div>
+            <h4 style="font-size:16px;font-weight:700;margin-bottom:8px;">成長方向チェック</h4>
+            <p style="font-size:12px;opacity:.7;line-height:1.7;">各テーマが外部で伸びているか・noteで伸びているかの方向を照合。「外部↑ note→」が取りこぼしシグナル。</p>
+            <div style="margin-top:12px;font-size:11px;opacity:.4;">データ: Google Trends YoY + note PV YoY</div>
+        </div>
+        <div style="padding:24px;background:rgba(255,255,255,.06);border-radius:14px;border-top:3px solid #d4a853;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px;opacity:.6;">分析3（Phase 2）</div>
+            <h4 style="font-size:16px;font-weight:700;margin-bottom:8px;">先行指標の検証</h4>
+            <p style="font-size:12px;opacity:.7;line-height:1.7;">noteで先に盛り上がったテーマが後からGoogle検索でも伸びるか。時系列の先行・遅行を計測。</p>
+            <div style="margin-top:12px;font-size:11px;opacity:.4;">データ: 6ヶ月以上の蓄積後に分析可能</div>
+        </div>
     </div>
-    <div style="display:flex;gap:24px;margin-top:12px;font-size:11px;opacity:.6;">
-        <span style="display:flex;align-items:center;gap:6px;"><span style="width:12px;height:12px;border-radius:50%;background:#1a5c6b;display:inline-block;"></span> note順位</span>
-        <span style="display:flex;align-items:center;gap:6px;"><span style="width:12px;height:12px;border-radius:50%;background:#c4845e;display:inline-block;"></span> Google検索順位</span>
-    </div>
-    <div class="src">Source: note中間データ × Google Trends推定</div>
+    <div class="src">Source: 分析設計。実データはAPI連携後に取得</div>
 </div>
 </div>
 
@@ -675,8 +681,8 @@ body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#1a1a2e;color:va
 <div class="slide bg-teal">
 <div class="s-inner">
     <div class="s-label">19 — Ingredient Trends</div>
-    <div class="s-title" style="font-size:28px;margin-bottom:4px;">外部で爆発する成分トレンド</div>
-    <div class="s-subtitle" style="font-size:14px;">2025年最大のバズ成分がnoteに到達しているか</div>
+    <div class="s-title" style="font-size:28px;margin-bottom:4px;">外部で急成長している成分キーワード</div>
+    <div class="s-subtitle" style="font-size:14px;">Google検索トレンドの推定成長率（業界分析記事の統合）</div>
     <div class="two-col">
         <div class="col">
             <div class="insight-cards">
@@ -688,7 +694,7 @@ body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#1a1a2e;color:va
         </div>
         <div class="col"><div class="chart-area"><canvas id="c_ingredients"></canvas></div></div>
     </div>
-    <div class="src">Source: Google Trends推定, @cosme, LIPS</div>
+    <div class="src">Source: マナミナ, 週刊粧業, @cosmeベスコス2025, WWDJAPAN等の業界報道からの推定値</div>
 </div>
 </div>
 
@@ -1079,66 +1085,16 @@ function renderExtBench() {
 }
 
 function renderSubcatGap() {
-    new Chart(document.getElementById('c_subcatgap'), { type:'bar', data:{ labels:['メンズスキンケア','成分解説','K-beauty','エイジングケア','ダーマコスメ','クリーンビューティー','日焼け止め','敏感肌'], datasets:[
-        { label:'note内', data:[62,55,10,20,15,5,8,12], backgroundColor:'#1a5c6b', borderRadius:4 },
-        { label:'外部', data:[15,35,35,5.5,7.7,8.5,7,5.6], backgroundColor:'#c4845e', borderRadius:4 }
-    ]}, options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y', plugins:{ legend:{position:'bottom',labels:{usePointStyle:true,padding:12}} }, scales:{ x:{ticks:{callback:v=>'+'+v+'%'},grid:{color:'#f0f0f0'}}, y:{grid:{display:false}} } } });
+    const labels = ['K-beauty','クリーンビューティー','ダーマコスメ','日焼け止め','敏感肌','エイジングケア','メンズスキンケア','成分（ナイアシンアミド等）'];
+    const data = [8.38,8.5,7.7,7,5.6,5.5,15,35];
+    const sources = ['Spherical Insights CAGR','KD Market Insights CAGR','Euromonitor グローバルCAGR','インテージ 売上推定','矢野経済 売上成長率','IMARC グローバルCAGR','東洋新薬 売上推定','富士経済 売上成長率'];
+    new Chart(document.getElementById('c_subcatgap'), { type:'bar', data:{ labels:labels, datasets:[
+        { label:'外部市場 成長率', data:data, backgroundColor:'#c4845e', borderRadius:4 }
+    ]}, options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y', plugins:{ legend:{display:false}, tooltip:{callbacks:{label:function(c){return '+'+c.raw+'% ('+sources[c.dataIndex]+')';}}} }, scales:{ x:{ticks:{callback:v=>'+'+v+'%'},grid:{color:'#f0f0f0'},title:{display:true,text:'YoY成長率 / CAGR',font:{size:10}}}, y:{grid:{display:false}} } } });
 }
 
 function renderGapMatrix() {
-    const themes = ['メンズスキンケア','成分解説','敏感肌','日焼け止め','K-beauty','エイジングケア','PDRN','ルーティン解説'];
-    const googleRank = [5,8,3,1,4,6,2,10];
-    const noteRank   = [2,3,6,8,9,5,12,4];
-    const dumbbellPlugin = {
-        id:'dumbbell',
-        afterDatasetsDraw(chart) {
-            const {ctx} = chart;
-            const meta0 = chart.getDatasetMeta(0);
-            const meta1 = chart.getDatasetMeta(1);
-            for (let i = 0; i < meta0.data.length; i++) {
-                const p0 = meta0.data[i]; const p1 = meta1.data[i];
-                const diff = noteRank[i] - googleRank[i];
-                ctx.save();
-                ctx.beginPath();
-                ctx.moveTo(p0.x, p0.y);
-                ctx.lineTo(p1.x, p1.y);
-                ctx.strokeStyle = diff < 0 ? 'rgba(125,211,192,.5)' : diff > 0 ? 'rgba(220,38,38,.4)' : 'rgba(255,255,255,.3)';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                ctx.restore();
-            }
-        }
-    };
-    new Chart(document.getElementById('c_gapmatrix'), {
-        type:'scatter',
-        plugins:[dumbbellPlugin],
-        data:{
-            datasets:[
-                { label:'note順位', data: noteRank.map((r,i) => ({x:r, y:i})), backgroundColor:'#1a5c6b', borderColor:'#1a5c6b', pointRadius:8, pointHoverRadius:10 },
-                { label:'Google検索順位', data: googleRank.map((r,i) => ({x:r, y:i})), backgroundColor:'#c4845e', borderColor:'#c4845e', pointRadius:8, pointHoverRadius:10 }
-            ]
-        },
-        options:{
-            responsive:true, maintainAspectRatio:false,
-            plugins:{
-                legend:{ position:'bottom', labels:{ usePointStyle:true, padding:14, color:'rgba(255,255,255,.6)', font:{size:10} } },
-                tooltip:{ callbacks:{ label: function(c){ return c.dataset.label + ': ' + c.parsed.x + '位'; } } }
-            },
-            scales:{
-                x:{
-                    reverse:true, min:0.5, max:13,
-                    title:{ display:true, text:'順位（左が上位）', font:{size:10,color:'rgba(255,255,255,.4)'} },
-                    ticks:{ color:'rgba(255,255,255,.4)', stepSize:1, callback:function(v){ return v >= 1 && v <= 12 && Number.isInteger(v) ? v+'位' : ''; } },
-                    grid:{ color:'rgba(255,255,255,.06)' }
-                },
-                y:{
-                    reverse:true, min:-0.5, max:themes.length - 0.5,
-                    ticks:{ color:'rgba(255,255,255,.6)', callback:function(v){ return themes[v] || ''; }, stepSize:1 },
-                    grid:{ color:'rgba(255,255,255,.06)' }
-                }
-            }
-        }
-    });
+    // Replaced with static content (Analysis Approach slide). No chart needed.
 }
 
 function renderIngredients() {
