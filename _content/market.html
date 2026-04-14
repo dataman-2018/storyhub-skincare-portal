@@ -608,43 +608,43 @@ body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#1a1a2e;color:va
 </div>
 </div>
 
-<!-- ========== PAGE 18: Growth Gap Overview ========== -->
+<!-- ========== PAGE 18: External Context ========== -->
 <div class="slide bg-cream">
 <div class="s-inner">
-    <div class="s-label" style="color:var(--a);">16 — Growth Gap Overview</div>
-    <div class="s-title" style="font-size:28px;margin-bottom:8px;">外部市場との成長ギャップ</div>
+    <div class="s-label" style="color:var(--a);">16 — External Context</div>
+    <div class="s-title" style="font-size:28px;margin-bottom:8px;">外部市場の概況</div>
     <div class="two-col wide-right">
         <div class="col">
-            <div class="s-body" style="margin-bottom:16px;">スキンケア市場全体の成長率は<strong style="color:var(--a);">+3.5%</strong>。noteカテゴリの<strong style="color:var(--a);">+18%</strong>は市場成長の約5倍。</div>
-            <div class="s-body">情報需要が購買行動に先行するパターンが確認された。</div>
+            <div class="s-body" style="margin-bottom:16px;">日本のスキンケア市場は<strong style="color:var(--a);">1兆4,624億円</strong>（前年比+3.5%）で安定成長。一方、Google検索では<strong style="color:var(--o);">PDRN +300%</strong>、<strong style="color:var(--o);">ガラクトミセス +180%</strong>など特定成分が急騰。</div>
+            <div class="s-body">noteではどのテーマが拾えていて、どこに取りこぼしがあるか。外部トレンドとの<strong>ランキング順位比較</strong>と<strong>成長方向性の突合</strong>で検証する。</div>
         </div>
         <div class="col"><div class="chart-area"><canvas id="c_extbench"></canvas></div></div>
     </div>
     <div class="kpi-row" style="margin-top:20px;">
-        <div class="kpi"><div class="kpi-val" style="color:var(--a);">1兆4,624億円</div><div class="kpi-label">市場規模</div></div>
-        <div class="kpi"><div class="kpi-val" style="color:var(--a);">5.1×</div><div class="kpi-label">note/外部成長倍率</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:var(--a);">1兆4,624億円</div><div class="kpi-label">スキンケア市場規模</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:var(--o);">+300%</div><div class="kpi-label">PDRN検索成長率</div></div>
         <div class="kpi"><div class="kpi-val" style="color:var(--a);">+45%</div><div class="kpi-label">LLM流入成長</div></div>
     </div>
-    <div class="src">Source: 富士経済 2025 / note中間データ</div>
+    <div class="src">Source: 富士経済 2025 / Google Trends推定</div>
 </div>
 </div>
 
-<!-- ========== PAGE 19: Growth Gap by Sub-category ========== -->
+<!-- ========== PAGE 19: Trend Direction by Sub-category ========== -->
 <div class="slide bg-white">
 <div class="s-inner">
-    <div class="s-label" style="color:var(--a);">17 — Growth Gap by Sub-category</div>
-    <div class="s-title" style="font-size:28px;margin-bottom:8px;">サブカテゴリ別：note内 vs 外部成長率</div>
+    <div class="s-label" style="color:var(--a);">17 — Trend Direction</div>
+    <div class="s-title" style="font-size:28px;margin-bottom:8px;">成長の方向性：noteと外部で一致しているか</div>
     <div class="two-col wide-right">
         <div class="col">
             <div class="insight-cards">
-                <div class="i-card"><div class="num">+47pt</div><div class="text">メンズ：Growth Gap +47pt：noteが大幅に先行</div></div>
-                <div class="i-card"><div class="num">-25pt</div><div class="text">K-beauty：Growth Gap -25pt：外部が先行 → コンテンツ機会</div></div>
-                <div class="i-card"><div class="num">+20pt</div><div class="text">成分解説：noteの構造的優位</div></div>
+                <div class="i-card"><div class="num" style="color:var(--a);">↑↑</div><div class="text">メンズ：noteも外部も急成長。noteで特に読まれるテーマ</div></div>
+                <div class="i-card"><div class="num" style="color:var(--r);">→↑</div><div class="text">K-beauty：外部は急成長だがnoteでは伸び鈍い → 取りこぼし候補</div></div>
+                <div class="i-card"><div class="num" style="color:var(--a);">↑→</div><div class="text">成分解説：noteの方が先に伸びている → 長文テキストの強み</div></div>
             </div>
         </div>
         <div class="col"><div class="chart-area"><canvas id="c_subcatgap"></canvas></div></div>
     </div>
-    <div class="src">Source: 富士経済, 矢野経済, Euromonitor / note中間データ</div>
+    <div class="src">Source: 富士経済, 矢野経済, Euromonitor / note中間データ（※note値はサンプル）</div>
 </div>
 </div>
 
@@ -1075,7 +1075,7 @@ function renderCompanyGap() {
 }
 
 function renderExtBench() {
-    new Chart(document.getElementById('c_extbench'), { type:'bar', data:{ labels:['外部市場','noteカテゴリPV','メンズ(外部)','メンズ(note)','成分(外部)','成分(note)'], datasets:[{ data:[3.5,18,15,62,35,55], backgroundColor:function(ctx){ return [1,3,5].includes(ctx.dataIndex)?'#1a5c6b':'#c4845e'; }, borderRadius:4 }] }, options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y', plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'+'+c.raw+'%'}}}, scales:{ x:{ticks:{callback:v=>'+'+v+'%'},grid:{color:'#f0f0f0'},title:{display:true,text:'成長率 (%)',font:{size:10}}}, y:{grid:{display:false}} } } });
+    new Chart(document.getElementById('c_extbench'), { type:'bar', data:{ labels:['PDRN','ガラクトミセス','レチノール','ナイアシンアミド','メンズSC','韓国SC','ダーマコスメ','日焼け止め'], datasets:[{ label:'Google検索 成長率', data:[300,180,85,70,65,60,50,40], backgroundColor:'#c4845e', borderRadius:4 }] }, options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y', plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'+'+c.raw+'%'}}}, scales:{ x:{ticks:{callback:v=>'+'+v+'%'},grid:{color:'#f0f0f0'},title:{display:true,text:'Google検索 YoY成長率（推定）',font:{size:10}}}, y:{grid:{display:false}} } } });
 }
 
 function renderSubcatGap() {
