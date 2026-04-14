@@ -608,10 +608,10 @@ body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#1a1a2e;color:va
 </div>
 </div>
 
-<!-- ========== PAGE 18: External Benchmark ========== -->
+<!-- ========== PAGE 18: Growth Gap Overview ========== -->
 <div class="slide bg-cream">
 <div class="s-inner">
-    <div class="s-label" style="color:var(--a);">16 — External Benchmark</div>
+    <div class="s-label" style="color:var(--a);">16 — Growth Gap Overview</div>
     <div class="s-title" style="font-size:28px;margin-bottom:8px;">外部市場との成長ギャップ</div>
     <div class="two-col wide-right">
         <div class="col">
@@ -629,17 +629,17 @@ body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#1a1a2e;color:va
 </div>
 </div>
 
-<!-- ========== PAGE 19: Sub-category Gap ========== -->
+<!-- ========== PAGE 19: Growth Gap by Sub-category ========== -->
 <div class="slide bg-white">
 <div class="s-inner">
-    <div class="s-label" style="color:var(--a);">17 — Sub-category Gap</div>
+    <div class="s-label" style="color:var(--a);">17 — Growth Gap by Sub-category</div>
     <div class="s-title" style="font-size:28px;margin-bottom:8px;">サブカテゴリ別：note内 vs 外部成長率</div>
     <div class="two-col wide-right">
         <div class="col">
             <div class="insight-cards">
-                <div class="i-card"><div class="num">4.1×</div><div class="text">メンズ：noteが4倍先行</div></div>
-                <div class="i-card"><div class="num">3.5×</div><div class="text">K-beauty：外部が3.5倍先行 → コンテンツ機会</div></div>
-                <div class="i-card"><div class="num">1.6×</div><div class="text">成分解説：noteの構造的優位</div></div>
+                <div class="i-card"><div class="num">+47pt</div><div class="text">メンズ：Growth Gap +47pt：noteが大幅に先行</div></div>
+                <div class="i-card"><div class="num">-25pt</div><div class="text">K-beauty：Growth Gap -25pt：外部が先行 → コンテンツ機会</div></div>
+                <div class="i-card"><div class="num">+20pt</div><div class="text">成分解説：noteの構造的優位</div></div>
             </div>
         </div>
         <div class="col"><div class="chart-area"><canvas id="c_subcatgap"></canvas></div></div>
@@ -648,17 +648,24 @@ body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#1a1a2e;color:va
 </div>
 </div>
 
-<!-- ========== PAGE 20: Gap Index Matrix ========== -->
+<!-- ========== PAGE 20: Trend Ranking ========== -->
 <div class="slide bg-dark">
 <div class="s-inner">
-    <div class="s-label">18 — Gap Index Matrix</div>
-    <div class="s-title" style="font-size:28px;margin-bottom:4px;">Over / Under Index マトリクス</div>
-    <div class="s-subtitle" style="font-size:14px;">Gap Index = note内シェア ÷ 外部市場シェア</div>
-    <div style="flex:1;position:relative;min-height:340px;"><canvas id="c_gapmatrix"></canvas></div>
+    <div class="s-label">18 — Trend Ranking</div>
+    <div class="s-title" style="font-size:28px;margin-bottom:4px;">トレンドランキング：note vs 外部</div>
+    <div class="s-subtitle" style="font-size:14px;">同じテーマの人気順位がどれだけズレているか</div>
+    <div class="two-col wide-right">
+        <div class="col">
+            <div class="insight-cards">
+                <div class="i-card"><div class="text" style="font-size:12px;line-height:1.8;"><strong style="color:#dc2626;">外部で上位 / noteで下位</strong><br>日焼け止め・PDRN・K-beauty<br>→ コンテンツ投下の優先候補</div></div>
+                <div class="i-card"><div class="text" style="font-size:12px;line-height:1.8;"><strong style="color:#7dd3c0;">noteが外部より上位</strong><br>メンズ・成分解説・ルーティン<br>→ noteの強み</div></div>
+            </div>
+        </div>
+        <div class="col"><div class="chart-area" style="min-height:380px;"><canvas id="c_gapmatrix"></canvas></div></div>
+    </div>
     <div style="display:flex;gap:24px;margin-top:12px;font-size:11px;opacity:.6;">
-        <span style="display:flex;align-items:center;gap:6px;"><span style="width:12px;height:12px;border-radius:50%;background:#7dd3c0;display:inline-block;"></span> Over-indexed（note優位）</span>
-        <span style="display:flex;align-items:center;gap:6px;"><span style="width:12px;height:12px;border-radius:50%;background:#d4a853;display:inline-block;"></span> バランス圏</span>
-        <span style="display:flex;align-items:center;gap:6px;"><span style="width:12px;height:12px;border-radius:50%;background:#dc2626;display:inline-block;"></span> Under-indexed（コンテンツ機会）</span>
+        <span style="display:flex;align-items:center;gap:6px;"><span style="width:12px;height:12px;border-radius:50%;background:#1a5c6b;display:inline-block;"></span> note順位</span>
+        <span style="display:flex;align-items:center;gap:6px;"><span style="width:12px;height:12px;border-radius:50%;background:#c4845e;display:inline-block;"></span> Google検索順位</span>
     </div>
     <div class="src">Source: note中間データ × Google Trends推定</div>
 </div>
@@ -1079,15 +1086,59 @@ function renderSubcatGap() {
 }
 
 function renderGapMatrix() {
-    const diagonalPlugin = { id:'diagonal', afterDraw(chart) { const {ctx,scales:{x,y}} = chart; ctx.save(); ctx.setLineDash([6,4]); ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=1; const x0=x.getPixelForValue(x.min),y0=y.getPixelForValue(x.min),x1=x.getPixelForValue(x.max),y1=y.getPixelForValue(x.max); ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y1); ctx.stroke(); ctx.fillStyle='rgba(255,255,255,.35)'; ctx.font='11px DM Sans'; ctx.fillText('Over-indexed',x.getPixelForValue(3)+4,y.getPixelForValue(7.5)); ctx.fillText('Under-indexed',x.getPixelForValue(7),y.getPixelForValue(3.5)); ctx.restore(); } };
-    new Chart(document.getElementById('c_gapmatrix'), { type:'bubble', plugins:[diagonalPlugin], data:{ datasets:[
-        { label:'メンズスキンケア', data:[{x:4.1,y:8.2,r:15}], backgroundColor:'rgba(125,211,192,.7)' },
-        { label:'成分解説', data:[{x:3.8,y:6.5,r:18}], backgroundColor:'rgba(125,211,192,.7)' },
-        { label:'エイジングケア', data:[{x:6.8,y:7.0,r:20}], backgroundColor:'rgba(212,168,83,.7)' },
-        { label:'韓国コスメ', data:[{x:5.2,y:4.8,r:14}], backgroundColor:'rgba(212,168,83,.7)' },
-        { label:'敏感肌', data:[{x:7.2,y:5.0,r:16}], backgroundColor:'rgba(220,38,38,.7)' },
-        { label:'日焼け止め', data:[{x:9.5,y:3.1,r:22}], backgroundColor:'rgba(220,38,38,.7)' }
-    ]}, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'bottom',labels:{usePointStyle:true,padding:10,color:'rgba(255,255,255,.6)',font:{size:10}}}, tooltip:{callbacks:{label:c=>c.dataset.label+' 外部:'+c.parsed.x+'% note:'+c.parsed.y+'%'}} }, scales:{ x:{title:{display:true,text:'外部市場シェア (%)',font:{size:10,color:'rgba(255,255,255,.4)'}},ticks:{color:'rgba(255,255,255,.4)'},grid:{color:'rgba(255,255,255,.06)'}}, y:{title:{display:true,text:'note内PVシェア (%)',font:{size:10,color:'rgba(255,255,255,.4)'}},ticks:{color:'rgba(255,255,255,.4)'},grid:{color:'rgba(255,255,255,.06)'}} } } });
+    const themes = ['メンズスキンケア','成分解説','敏感肌','日焼け止め','K-beauty','エイジングケア','PDRN','ルーティン解説'];
+    const googleRank = [5,8,3,1,4,6,2,10];
+    const noteRank   = [2,3,6,8,9,5,12,4];
+    const dumbbellPlugin = {
+        id:'dumbbell',
+        afterDatasetsDraw(chart) {
+            const {ctx} = chart;
+            const meta0 = chart.getDatasetMeta(0);
+            const meta1 = chart.getDatasetMeta(1);
+            for (let i = 0; i < meta0.data.length; i++) {
+                const p0 = meta0.data[i]; const p1 = meta1.data[i];
+                const diff = noteRank[i] - googleRank[i];
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(p0.x, p0.y);
+                ctx.lineTo(p1.x, p1.y);
+                ctx.strokeStyle = diff < 0 ? 'rgba(125,211,192,.5)' : diff > 0 ? 'rgba(220,38,38,.4)' : 'rgba(255,255,255,.3)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+    };
+    new Chart(document.getElementById('c_gapmatrix'), {
+        type:'scatter',
+        plugins:[dumbbellPlugin],
+        data:{
+            datasets:[
+                { label:'note順位', data: noteRank.map((r,i) => ({x:r, y:i})), backgroundColor:'#1a5c6b', borderColor:'#1a5c6b', pointRadius:8, pointHoverRadius:10 },
+                { label:'Google検索順位', data: googleRank.map((r,i) => ({x:r, y:i})), backgroundColor:'#c4845e', borderColor:'#c4845e', pointRadius:8, pointHoverRadius:10 }
+            ]
+        },
+        options:{
+            responsive:true, maintainAspectRatio:false,
+            plugins:{
+                legend:{ position:'bottom', labels:{ usePointStyle:true, padding:14, color:'rgba(255,255,255,.6)', font:{size:10} } },
+                tooltip:{ callbacks:{ label: function(c){ return c.dataset.label + ': ' + c.parsed.x + '位'; } } }
+            },
+            scales:{
+                x:{
+                    reverse:true, min:0.5, max:13,
+                    title:{ display:true, text:'順位（左が上位）', font:{size:10,color:'rgba(255,255,255,.4)'} },
+                    ticks:{ color:'rgba(255,255,255,.4)', stepSize:1, callback:function(v){ return v >= 1 && v <= 12 && Number.isInteger(v) ? v+'位' : ''; } },
+                    grid:{ color:'rgba(255,255,255,.06)' }
+                },
+                y:{
+                    reverse:true, min:-0.5, max:themes.length - 0.5,
+                    ticks:{ color:'rgba(255,255,255,.6)', callback:function(v){ return themes[v] || ''; }, stepSize:1 },
+                    grid:{ color:'rgba(255,255,255,.06)' }
+                }
+            }
+        }
+    });
 }
 
 function renderIngredients() {
