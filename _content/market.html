@@ -615,17 +615,17 @@ body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#1a1a2e;color:va
     <div class="s-title" style="font-size:28px;margin-bottom:8px;">外部市場の概況</div>
     <div class="two-col wide-right">
         <div class="col">
-            <div class="s-body" style="margin-bottom:16px;">日本のスキンケア市場は<strong style="color:var(--a);">1兆4,624億円</strong>（前年比+3.5%）で安定成長。一方、Google検索では<strong style="color:var(--o);">PDRN +300%</strong>、<strong style="color:var(--o);">ガラクトミセス +180%</strong>など特定成分が急騰。</div>
-            <div class="s-body">noteではどのテーマが拾えていて、どこに取りこぼしがあるか。外部トレンドとの<strong>ランキング順位比較</strong>と<strong>成長方向性の突合</strong>で検証する。</div>
+            <div class="s-body" style="margin-bottom:16px;">日本のスキンケア市場は<strong style="color:var(--a);">1兆4,624億円</strong>（前年比+3.5%）で安定成長。一方、Google検索ではクリニック由来成分の市販化が加速し、<strong style="color:var(--o);">PDRN +415%</strong>、<strong style="color:var(--o);">エクソソーム +380%</strong>と爆発的な検索増。</div>
+            <div class="s-body">消費者の購買行動が「ブランド指名」から「成分の指名買い」へ構造転換。Google検索上位30キーワードの大半が特定成分名。</div>
         </div>
         <div class="col"><div class="chart-area"><canvas id="c_extbench"></canvas></div></div>
     </div>
     <div class="kpi-row" style="margin-top:20px;">
-        <div class="kpi"><div class="kpi-val" style="color:var(--a);">1兆4,624億円</div><div class="kpi-label">スキンケア市場規模</div></div>
-        <div class="kpi"><div class="kpi-val" style="color:var(--o);">+300%</div><div class="kpi-label">PDRN検索成長率</div></div>
-        <div class="kpi"><div class="kpi-val" style="color:var(--a);">+45%</div><div class="kpi-label">LLM流入成長</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:var(--a);">1兆4,624億円</div><div class="kpi-label">スキンケア市場規模（富士経済）</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:var(--o);">+415%</div><div class="kpi-label">PDRN検索成長率（Google Trends）</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:var(--o);">+380%</div><div class="kpi-label">エクソソーム検索成長率（Google Trends）</div></div>
     </div>
-    <div class="src">Source: 市場規模=富士経済 2025年7月 / 検索成長率=業界報道からの推定</div>
+    <div class="src">Source: 市場規模=富士経済 2025年7月 / 検索成長率=Google Trends（Gemini Deep Research集計）</div>
 </div>
 </div>
 
@@ -638,7 +638,7 @@ body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#1a1a2e;color:va
         <div class="col">
             <div class="s-body" style="font-size:13px;line-height:1.9;margin-bottom:16px;">各サブカテゴリの外部成長率を一覧化。<strong style="color:var(--a);">note側のデータは今後API連携で取得し、並列表示する予定。</strong></div>
             <div class="insight-cards">
-                <div class="i-card"><div class="text" style="font-size:12px;line-height:1.8;"><strong>指標の出典</strong><br>売上成長率: 富士経済・矢野経済<br>検索成長率: Google Trends推定<br>グローバルCAGR: IMARC・Euromonitor</div></div>
+                <div class="i-card"><div class="text" style="font-size:12px;line-height:1.8;"><strong>指標の出典</strong><br>Gemini Deep Research集計<br>元データ: 富士経済・矢野経済・IMARC・Euromonitor・インテージ等<br>※各バーにツールチップで根拠表示</div></div>
             </div>
         </div>
         <div class="col"><div class="chart-area"><canvas id="c_subcatgap"></canvas></div></div>
@@ -686,15 +686,15 @@ body{font-family:'Noto Sans JP','DM Sans',sans-serif;background:#1a1a2e;color:va
     <div class="two-col">
         <div class="col">
             <div class="insight-cards">
-                <div class="i-card"><div class="num" style="color:var(--gold);">+300%</div><div class="text">PDRN：Anua 14冠、再生医療由来の注目成分</div></div>
-                <div class="i-card"><div class="num" style="color:var(--gold);">+180%</div><div class="text">ガラクトミセス：K-beauty由来の発酵成分</div></div>
-                <div class="i-card"><div class="num" style="color:var(--gold);">+85%</div><div class="text">レチノール：使い方解説需要が急拡大</div></div>
-                <div class="i-card"><div class="num" style="color:var(--gold);">+70%</div><div class="text">ナイアシンアミド：1,205億円市場予測</div></div>
+                <div class="i-card"><div class="num" style="color:var(--gold);">+415%</div><div class="text">PDRN：クリニック「サーモン注射」の市販化。リジュラン等の台頭</div></div>
+                <div class="i-card"><div class="num" style="color:var(--gold);">+380%</div><div class="text">エクソソーム：幹細胞培養液由来。高価格帯エイジングラインに実装</div></div>
+                <div class="i-card"><div class="num" style="color:var(--gold);">+275%</div><div class="text">アゼライン酸：赤み・酒さ・ニキビ跡の皮膚科学的アプローチ</div></div>
+                <div class="i-card"><div class="num" style="color:var(--gold);">+210%</div><div class="text">バクチオール：レチノール代替。敏感肌層の次世代エイジングケア</div></div>
             </div>
         </div>
         <div class="col"><div class="chart-area"><canvas id="c_ingredients"></canvas></div></div>
     </div>
-    <div class="src">Source: マナミナ, 週刊粧業, @cosmeベスコス2025, WWDJAPAN等の業界報道からの推定値</div>
+    <div class="src">Source: Google Trends（Gemini Deep Research集計）/ @cosme・LIPSベスコス2025・WWDJAPAN等</div>
 </div>
 </div>
 
@@ -1081,16 +1081,16 @@ function renderCompanyGap() {
 }
 
 function renderExtBench() {
-    new Chart(document.getElementById('c_extbench'), { type:'bar', data:{ labels:['PDRN','ガラクトミセス','レチノール','ナイアシンアミド','メンズSC','韓国SC','ダーマコスメ','日焼け止め'], datasets:[{ label:'Google検索 成長率', data:[300,180,85,70,65,60,50,40], backgroundColor:'#c4845e', borderRadius:4 }] }, options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y', plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'+'+c.raw+'%'}}}, scales:{ x:{ticks:{callback:v=>'+'+v+'%'},grid:{color:'#f0f0f0'},title:{display:true,text:'Google検索 YoY成長率（推定）',font:{size:10}}}, y:{grid:{display:false}} } } });
+    new Chart(document.getElementById('c_extbench'), { type:'bar', data:{ labels:['PDRN','エクソソーム','AI肌診断','アゼライン酸','トーンアップUV','バクチオール','ナイアシンアミド濃度','発酵導入美容液'], datasets:[{ label:'Google検索 YoY成長率', data:[415,380,310,275,240,210,195,180], backgroundColor:'#c4845e', borderRadius:4 }] }, options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y', plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'+'+c.raw+'%（Google Trends）'}}}, scales:{ x:{ticks:{callback:v=>'+'+v+'%'},grid:{color:'#f0f0f0'},title:{display:true,text:'Google検索 YoY成長率（Google Trends）',font:{size:10}}}, y:{grid:{display:false}} } } });
 }
 
 function renderSubcatGap() {
-    const labels = ['K-beauty','クリーンビューティー','ダーマコスメ','日焼け止め','敏感肌','エイジングケア','メンズスキンケア','成分（ナイアシンアミド等）'];
-    const data = [8.38,8.5,7.7,7,5.6,5.5,15,35];
-    const sources = ['Spherical Insights CAGR','KD Market Insights CAGR','Euromonitor グローバルCAGR','インテージ 売上推定','矢野経済 売上成長率','IMARC グローバルCAGR','東洋新薬 売上推定','富士経済 売上成長率'];
+    const labels = ['K-beauty','ダーマコスメ（国内）','エイジングケア','メンズスキンケア','敏感肌ケア','日焼け止め・UV','クリーンビューティー'];
+    const data = [25,17.5,14,11,8,6,5];
+    const sources = ['Qoo10メガ割基点。Anua・Innisfree等が席巻','グローバルCAGR 7.59%、国内+15-20%の中間値','ペプチド・バクチオール等の新成分。AI活用パーソナライズ化','定着フェーズ。ジェンダーレスブランドの台頭','キュレル・イハダ等のリピート購買による底堅い成長','成熟市場。トーンアップ等の付加価値による単価上昇','日本市場では「ベースの企業姿勢」レベル'];
     new Chart(document.getElementById('c_subcatgap'), { type:'bar', data:{ labels:labels, datasets:[
-        { label:'外部市場 成長率', data:data, backgroundColor:'#c4845e', borderRadius:4 }
-    ]}, options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y', plugins:{ legend:{display:false}, tooltip:{callbacks:{label:function(c){return '+'+c.raw+'% ('+sources[c.dataIndex]+')';}}} }, scales:{ x:{ticks:{callback:v=>'+'+v+'%'},grid:{color:'#f0f0f0'},title:{display:true,text:'YoY成長率 / CAGR',font:{size:10}}}, y:{grid:{display:false}} } } });
+        { label:'外部市場 推計成長率', data:data, backgroundColor:'#c4845e', borderRadius:4 }
+    ]}, options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y', plugins:{ legend:{display:false}, tooltip:{callbacks:{label:function(c){return '+'+c.raw+'% — '+sources[c.dataIndex];}}} }, scales:{ x:{ticks:{callback:v=>'+'+v+'%'},grid:{color:'#f0f0f0'},title:{display:true,text:'推計YoY成長率（Gemini Deep Research集計）',font:{size:10}}}, y:{grid:{display:false}} } } });
 }
 
 function renderGapMatrix() {
@@ -1098,9 +1098,9 @@ function renderGapMatrix() {
 }
 
 function renderIngredients() {
-    const vals = [300,180,120,85,70,60,35,50];
-    const colors = vals.map(v => { const t=Math.min(v/300,1); return `rgba(${Math.round(220*t+26*(1-t))},${Math.round(38*t+92*(1-t))},${Math.round(38*t+107*(1-t))},.8)`; });
-    new Chart(document.getElementById('c_ingredients'), { type:'bar', data:{ labels:['PDRN','ガラクトミセス','アルティミューン','レチノール','ナイアシンアミド','韓国スキンケア','敏感肌','ダーマコスメ'], datasets:[{ data:vals, backgroundColor:colors, borderRadius:4 }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'+'+c.raw+'%'}}}, scales:{ y:{ticks:{color:'rgba(255,255,255,.4)',callback:v=>'+'+v+'%'},grid:{color:'rgba(255,255,255,.06)'}}, x:{ticks:{color:'rgba(255,255,255,.4)',maxRotation:45},grid:{display:false}} } } });
+    const vals = [415,380,310,275,210,195,165,150];
+    const colors = vals.map(v => { const t=Math.min(v/415,1); return `rgba(${Math.round(220*t+26*(1-t))},${Math.round(38*t+92*(1-t))},${Math.round(38*t+107*(1-t))},.8)`; });
+    new Chart(document.getElementById('c_ingredients'), { type:'bar', data:{ labels:['PDRN','エクソソーム','AI肌診断','アゼライン酸','バクチオール','ナイアシンアミド\n濃度','グルタチオン','美顔器\n浸透'], datasets:[{ data:vals, backgroundColor:colors, borderRadius:4 }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'+'+c.raw+'%（Google Trends）'}}}, scales:{ y:{ticks:{color:'rgba(255,255,255,.4)',callback:v=>'+'+v+'%'},grid:{color:'rgba(255,255,255,.06)'}}, x:{ticks:{color:'rgba(255,255,255,.4)',maxRotation:45},grid:{display:false}} } } });
 }
 
 // Init
