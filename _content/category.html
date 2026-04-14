@@ -143,6 +143,35 @@
             .db { padding: 0 16px 60px; }
             .kpi-grid, .trend-grid { grid-template-columns: 1fr 1fr; }
         }
+        /* Hashtag Drill-down */
+        .hashtag-section { margin-bottom: 28px; }
+        .hashtag-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .hashtag-section-title { font-size: 13px; font-weight: 600; color: var(--a); }
+        .hashtag-section-badge { font-size: 10px; padding: 3px 10px; background: #fef3e2; color: var(--orange); border-radius: 12px; font-weight: 600; }
+        .hashtag-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+        .hashtag-card { padding: 14px 16px; background: var(--s); border: 1px solid var(--b); border-radius: 10px; cursor: pointer; transition: all .2s; display: flex; justify-content: space-between; align-items: center; }
+        .hashtag-card:hover { border-color: var(--a); background: var(--al); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .hashtag-card.active { border-color: var(--a); background: var(--al); }
+        .hashtag-name { font-size: 13px; font-weight: 600; color: var(--t); }
+        .hashtag-meta { text-align: right; }
+        .hashtag-count { font-size: 14px; font-weight: 700; font-family: 'DM Sans'; color: var(--a); }
+        .hashtag-sub { font-size: 10px; color: var(--ts); }
+        .hashtag-detail { display: none; margin-top: 16px; padding: 24px; background: var(--s); border: 1px solid var(--b); border-radius: 14px; }
+        .hashtag-detail.show { display: block; }
+        .hashtag-detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .hashtag-detail-title { font-size: 18px; font-weight: 700; }
+        .hashtag-detail-close { font-size: 12px; color: var(--ts); cursor: pointer; padding: 4px 12px; border: 1px solid var(--b); border-radius: 8px; background: none; font-family: inherit; }
+        .hashtag-detail-close:hover { background: var(--al); }
+        .hashtag-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+        .hashtag-kpi { text-align: center; padding: 12px; background: var(--al); border-radius: 8px; }
+        .hashtag-kpi-val { font-size: 20px; font-weight: 700; font-family: 'DM Sans'; color: var(--a); }
+        .hashtag-kpi-label { font-size: 10px; color: var(--ts); margin-top: 2px; }
+        .hashtag-placeholder { padding: 32px; text-align: center; color: var(--ts); font-size: 12px; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,.02) 10px, rgba(0,0,0,.02) 20px); border-radius: 8px; }
+        @media (max-width: 900px) {
+            .hashtag-grid { grid-template-columns: 1fr 1fr; }
+            .hashtag-kpi-row { grid-template-columns: 1fr 1fr; }
+        }
+
         /* Portal Nav */
         .portal-nav{position:fixed;top:0;left:0;right:0;z-index:9999;height:40px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(26,26,46,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.06)}
         .portal-brand{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:#fff;letter-spacing:.03em;opacity:.7}
@@ -181,6 +210,66 @@
             <button class="cat-btn"><span>スキンケア（基礎化粧品）</span><span style="font-size:10px;color:#9ca3af;margin-left:4px">▼</span></button>
         </div>
     </div>
+
+    <!-- ===== Hashtag Drill-down (Concept UI) ===== -->
+    <div class="hashtag-section">
+        <div class="hashtag-section-header">
+            <div class="hashtag-section-title">ハッシュタグ別ドリルダウン</div>
+            <div class="hashtag-section-badge">CONCEPT — データ連携後に有効化</div>
+        </div>
+        <div class="hashtag-grid" id="hashtagGrid">
+            <div class="hashtag-card" onclick="toggleHashtag(this, 'skincare-routine')">
+                <div class="hashtag-name">#スキンケアルーティン</div>
+                <div class="hashtag-meta"><div class="hashtag-count">1,240</div><div class="hashtag-sub">記事</div></div>
+            </div>
+            <div class="hashtag-card" onclick="toggleHashtag(this, 'ingredient-guide')">
+                <div class="hashtag-name">#成分解説</div>
+                <div class="hashtag-meta"><div class="hashtag-count">890</div><div class="hashtag-sub">記事</div></div>
+            </div>
+            <div class="hashtag-card" onclick="toggleHashtag(this, 'mens-skincare')">
+                <div class="hashtag-name">#メンズスキンケア</div>
+                <div class="hashtag-meta"><div class="hashtag-count">620</div><div class="hashtag-sub">記事</div></div>
+            </div>
+            <div class="hashtag-card" onclick="toggleHashtag(this, 'sensitive-skin')">
+                <div class="hashtag-name">#敏感肌</div>
+                <div class="hashtag-meta"><div class="hashtag-count">580</div><div class="hashtag-sub">記事</div></div>
+            </div>
+            <div class="hashtag-card" onclick="toggleHashtag(this, 'aging-care')">
+                <div class="hashtag-name">#エイジングケア</div>
+                <div class="hashtag-meta"><div class="hashtag-count">510</div><div class="hashtag-sub">記事</div></div>
+            </div>
+            <div class="hashtag-card" onclick="toggleHashtag(this, 'pore-care')">
+                <div class="hashtag-name">#毛穴ケア</div>
+                <div class="hashtag-meta"><div class="hashtag-count">470</div><div class="hashtag-sub">記事</div></div>
+            </div>
+            <div class="hashtag-card" onclick="toggleHashtag(this, 'uv-care')">
+                <div class="hashtag-name">#日焼け止め</div>
+                <div class="hashtag-meta"><div class="hashtag-count">390</div><div class="hashtag-sub">記事</div></div>
+            </div>
+            <div class="hashtag-card" onclick="toggleHashtag(this, 'k-beauty')">
+                <div class="hashtag-name">#韓国スキンケア</div>
+                <div class="hashtag-meta"><div class="hashtag-count">340</div><div class="hashtag-sub">記事</div></div>
+            </div>
+        </div>
+        <div class="hashtag-detail" id="hashtagDetail">
+            <div class="hashtag-detail-header">
+                <div class="hashtag-detail-title" id="hashtagDetailTitle">#スキンケアルーティン</div>
+                <button class="hashtag-detail-close" onclick="closeHashtag()">閉じる</button>
+            </div>
+            <div class="hashtag-kpi-row">
+                <div class="hashtag-kpi"><div class="hashtag-kpi-val" id="hdKpi1">1,240</div><div class="hashtag-kpi-label">記事数</div></div>
+                <div class="hashtag-kpi"><div class="hashtag-kpi-val" id="hdKpi2">85K</div><div class="hashtag-kpi-label">月間PV</div></div>
+                <div class="hashtag-kpi"><div class="hashtag-kpi-val" id="hdKpi3">41%</div><div class="hashtag-kpi-label">読了率</div></div>
+                <div class="hashtag-kpi"><div class="hashtag-kpi-val" id="hdKpi4">+32%</div><div class="hashtag-kpi-label">YoY成長率</div></div>
+            </div>
+            <div class="hashtag-placeholder">
+                チャートエリア（データ連携後に有効化）<br>
+                記事数推移 / PVトレンド / 読了率分布 / 人気記事TOP5
+            </div>
+        </div>
+    </div>
+
+    <hr class="divider" style="margin-bottom:28px;">
 
     <!-- ===== 1. Executive Narrative ===== -->
     <div class="narrative-bar">
@@ -561,6 +650,33 @@ new Chart(document.getElementById('aioChart'), {
         scales: { y: { ticks: { callback: v => v + '%' }, grid: { color: '#f0f0f0' } }, x: { title: { display: true, text: 'AIO適格度スコア', font: { size: 10 } }, grid: { display: false } } }
     }
 });
+
+// Hashtag drill-down interaction
+const hashtagData = {
+    'skincare-routine': { name: '#スキンケアルーティン', articles: '1,240', pv: '85K', read: '41%', yoy: '+32%' },
+    'ingredient-guide': { name: '#成分解説', articles: '890', pv: '72K', read: '58%', yoy: '+55%' },
+    'mens-skincare': { name: '#メンズスキンケア', articles: '620', pv: '64K', read: '45%', yoy: '+62%' },
+    'sensitive-skin': { name: '#敏感肌', articles: '580', pv: '48K', read: '52%', yoy: '+12%' },
+    'aging-care': { name: '#エイジングケア', articles: '510', pv: '41K', read: '47%', yoy: '+20%' },
+    'pore-care': { name: '#毛穴ケア', articles: '470', pv: '38K', read: '39%', yoy: '+18%' },
+    'uv-care': { name: '#日焼け止め', articles: '390', pv: '29K', read: '35%', yoy: '+8%' },
+    'k-beauty': { name: '#韓国スキンケア', articles: '340', pv: '31K', read: '43%', yoy: '+10%' }
+};
+function toggleHashtag(el, key) {
+    document.querySelectorAll('.hashtag-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    const d = hashtagData[key];
+    document.getElementById('hashtagDetailTitle').textContent = d.name;
+    document.getElementById('hdKpi1').textContent = d.articles;
+    document.getElementById('hdKpi2').textContent = d.pv;
+    document.getElementById('hdKpi3').textContent = d.read;
+    document.getElementById('hdKpi4').textContent = d.yoy;
+    document.getElementById('hashtagDetail').classList.add('show');
+}
+function closeHashtag() {
+    document.getElementById('hashtagDetail').classList.remove('show');
+    document.querySelectorAll('.hashtag-card').forEach(c => c.classList.remove('active'));
+}
 </script>
 </body>
 </html>
