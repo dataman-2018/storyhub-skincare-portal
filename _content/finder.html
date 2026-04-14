@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trend Gap Finder | note × StoryHub</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1" integrity="sha384-jb8JQMbMoBUzgWatfe6COACi2ljcDdZQ2OxczGA3bGNeWe+6DChMTBJemed7ZnvJ" crossorigin="anonymous"></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #f7f6f3; --s: #fff; --t: #1a1a2e; --ts: #6b7280;
+  --a: #1a5c6b; --a2: #2d8f9e; --al: #e8f4f6; --b: #e5e2db;
+  --green: #16a34a; --red: #dc2626; --orange: #c4845e; --gold: #d4a853;
+}
+
+body {
+  font-family: 'Noto Sans JP', 'DM Sans', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  color: var(--t);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* ── Nav ── */
+.portal-nav{position:fixed;top:0;left:0;right:0;z-index:9999;height:40px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(26,26,46,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.06)}
+.portal-brand{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:#fff;letter-spacing:.03em;opacity:.7}
+.portal-brand a{color:#fff;text-decoration:none}
+.portal-links{display:flex;gap:20px}
+.portal-links a{font-size:11px;color:#fff;text-decoration:none;opacity:.5;transition:opacity .2s;padding-bottom:2px}
+.portal-links a:hover{opacity:1}
+.portal-links a.active{opacity:1;color:#2d8f9e;border-bottom:2px solid #2d8f9e}
+
+/* ── Layout ── */
+.container { max-width: 1200px; margin: 0 auto; padding: 48px 24px 60px; }
+
+/* ── Page Header ── */
+.page-header { margin-bottom: 32px; }
+.page-header h1 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--t);
+  margin-bottom: 4px;
+}
+.page-header .subtitle {
+  font-size: 14px;
+  color: var(--ts);
+  margin-bottom: 12px;
+}
+.badge-proto {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .05em;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+/* ── Tabs ── */
+.tab-bar {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--b);
+  margin-bottom: 24px;
+}
+.tab-btn {
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ts);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: inherit;
+}
+.tab-btn:hover { color: var(--t); }
+.tab-btn.active { color: var(--a); border-bottom-color: var(--a); }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── Sort / Filter buttons ── */
+.btn-group { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.btn-sm {
+  padding: 5px 14px;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 6px;
+  border: 1px solid var(--b);
+  background: var(--s);
+  color: var(--ts);
+  cursor: pointer;
+  transition: all .2s;
+  font-family: inherit;
+}
+.btn-sm:hover { border-color: var(--a); color: var(--a); }
+.btn-sm.active { background: var(--a); color: #fff; border-color: var(--a); }
+
+/* ── Chart wrappers ── */
+.chart-wrap { background: var(--s); border-radius: 12px; padding: 20px; border: 1px solid var(--b); }
+.chart-wrap canvas { width: 100% !important; }
+
+/* ── Detail Panel (shared) ── */
+.detail-panel {
+  background: var(--s);
+  border: 1px solid var(--b);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 16px;
+  animation: fadeIn .2s ease;
+}
+.detail-panel h3 { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.detail-col h4 { font-size: 12px; font-weight: 600; color: var(--ts); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; }
+.detail-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; border-bottom: 1px solid #f3f2ef; }
+.detail-row .label { color: var(--ts); }
+.detail-row .value { font-weight: 500; }
+.detail-insight {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: var(--al);
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--a);
+}
+.detail-insight strong { font-weight: 600; }
+.fit-stars { color: var(--gold); letter-spacing: 2px; }
+
+/* ── Table ── */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ts);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  border-bottom: 2px solid var(--b);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.data-table th:hover { color: var(--a); }
+.data-table th .sort-arrow { font-size: 10px; margin-left: 3px; opacity: .4; }
+.data-table th.sorted .sort-arrow { opacity: 1; color: var(--a); }
+.data-table td { padding: 10px 12px; border-bottom: 1px solid #f3f2ef; vertical-align: middle; }
+.data-table tbody tr { cursor: pointer; transition: background .15s; }
+.data-table tbody tr:hover { background: #fafaf8; }
+.data-table tbody tr.expanded { background: var(--al); }
+
+.gap-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.gap-badge.miss { background: #fef2f2; color: var(--red); }
+.gap-badge.strong { background: #f0fdf4; color: var(--green); }
+.gap-badge.sync { background: #f9fafb; color: var(--ts); }
+
+.cat-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.table-detail-row td { padding: 0; border-bottom: 1px solid var(--b); }
+.table-detail-row .detail-panel { margin: 0; border: none; border-radius: 0; }
+
+.note-dummy { font-size: 10px; color: var(--ts); font-style: italic; margin-top: 4px; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .container { padding: 48px 12px 40px; }
+  .detail-grid { grid-template-columns: 1fr; }
+  .portal-links { gap: 12px; }
+  .portal-links a { font-size: 10px; }
+  .data-table { font-size: 12px; }
+  .data-table th, .data-table td { padding: 8px 6px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="portal-nav">
+  <div class="portal-brand"><a href="/">note × StoryHub</a></div>
+  <div class="portal-links">
+    <a href="/">ポータル</a>
+    <a href="/market">市場レポート</a>
+    <a href="/category">カテゴリ</a>
+    <a href="/sofina">ソフィーナIP</a>
+    <a href="/finder" class="active">Gap Finder</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1>Trend Gap Finder</h1>
+    <p class="subtitle">外部トレンド × note — 取りこぼしと強みの可視化</p>
+    <span class="badge-proto">PROTOTYPE — note側データはダミー。API連携後に実データに差し替え</span>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="gap-bar">ギャップバー</button>
+    <button class="tab-btn" data-tab="matrix">方向性マトリクス</button>
+    <button class="tab-btn" data-tab="table">詳細テーブル</button>
+  </div>
+
+  <!-- View 1: Gap Bar -->
+  <div id="gap-bar" class="tab-content active">
+    <div class="btn-group">
+      <button class="btn-sm active" data-sort="gap">ギャップ順</button>
+      <button class="btn-sm" data-sort="growth">外部成長率順</button>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="gapChart"></canvas>
+    </div>
+    <div id="barDetailPanel"></div>
+  </div>
+
+  <!-- View 2: Matrix -->
+  <div id="matrix" class="tab-content">
+    <div class="chart-wrap" style="max-width:720px;">
+      <canvas id="matrixChart" height="500"></canvas>
+    </div>
+  </div>
+
+  <!-- View 3: Table -->
+  <div id="table" class="tab-content">
+    <div class="btn-group">
+      <button class="btn-sm filter-btn active" data-filter="all">全件</button>
+      <button class="btn-sm filter-btn" data-filter="miss">取りこぼし</button>
+      <button class="btn-sm filter-btn" data-filter="strong">noteの強み</button>
+      <button class="btn-sm filter-btn" data-filter="sync">連動</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th data-col="name">テーマ <span class="sort-arrow">▲</span></th>
+            <th data-col="extRank">外部順位 <span class="sort-arrow">▲</span></th>
+            <th data-col="extGrowth">外部成長率 <span class="sort-arrow">▲</span></th>
+            <th data-col="noteRank">note順位 <span class="sort-arrow">▲</span></th>
+            <th data-col="gap">ギャップ <span class="sort-arrow">▲</span></th>
+            <th data-col="fit">相性 <span class="sort-arrow">▲</span></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <p class="note-dummy" style="margin-top:12px;">* note側の順位・記事数・PV・読了率は全てダミーデータです。API連携後に実データに差し替えます。</p>
+  </div>
+
+</div>
+
+<script>
+/* ================================================================
+   DATA — all theme data as a JS object array.
+   Replace with JSON fetch when API is ready.
+   ================================================================ */
+const themes = [
+  { name:'PDRN', category:'ingredient', extRank:1, extGrowth:415, extPeak:'2025年11月', extContext:'クリニック「サーモン注射」成分の市販化。リジュラン等の台頭', noteRank:15, noteGrowth:8, noteArticles:45, notePV:'3.2K', noteRead:'52%', fit:5, fitText:'成分メカニズムの科学的解説が必要。長文テキスト向き。TikTok/Instagramでは不可能な深さ' },
+  { name:'エクソソーム', category:'ingredient', extRank:2, extGrowth:380, extPeak:'2025年9月', extContext:'幹細胞培養液由来。高価格帯エイジングラインに実装が相次ぐ', noteRank:18, noteGrowth:5, noteArticles:28, notePV:'1.8K', noteRead:'48%', fit:5, fitText:'最先端の再生医療アプローチ。根拠の解説は長文テキストが最適' },
+  { name:'AI肌診断', category:'routine', extRank:3, extGrowth:310, extPeak:'2025年5月', extContext:'パーソナライズソリューションの普及。情報疲労への対抗策', noteRank:20, noteGrowth:3, noteArticles:15, notePV:'1.1K', noteRead:'35%', fit:3, fitText:'体験はアプリ上で完結。記事は比較レビュー向き' },
+  { name:'アゼライン酸', category:'ingredient', extRank:4, extGrowth:275, extPeak:'2025年7月', extContext:'赤み・酒さ・ニキビ跡の皮膚科学的アプローチ', noteRank:14, noteGrowth:12, noteArticles:52, notePV:'4.1K', noteRead:'55%', fit:5, fitText:'処方ベースの成分。使い方・注意点の詳細解説はnote向き' },
+  { name:'トーンアップUV', category:'routine', extRank:5, extGrowth:240, extPeak:'2025年4月', extContext:'ラロッシュポゼ等の高機能UV下地の定番化', noteRank:11, noteGrowth:15, noteArticles:85, notePV:'6.8K', noteRead:'32%', fit:2, fitText:'ビジュアル（色味・仕上がり）主体。Instagram向き' },
+  { name:'バクチオール', category:'ingredient', extRank:6, extGrowth:210, extPeak:'2025年10月', extContext:'レチノール代替。敏感肌層の次世代エイジングケア成分', noteRank:10, noteGrowth:25, noteArticles:68, notePV:'5.5K', noteRead:'58%', fit:5, fitText:'レチノールとの比較解説は典型的な長文テキストコンテンツ' },
+  { name:'ナイアシンアミド濃度', category:'ingredient', extRank:7, extGrowth:195, extPeak:'2025年12月', extContext:'「入っているか」から「何%配合か」へ評価軸が高度化', noteRank:4, noteGrowth:55, noteArticles:180, notePV:'14.2K', noteRead:'62%', fit:5, fitText:'濃度別比較・処方技術の解説はnoteの最も得意な領域' },
+  { name:'発酵導入美容液', category:'routine', extRank:8, extGrowth:180, extPeak:'2025年11月', extContext:'無印良品のヒット。スキンケアルーティンの再定義', noteRank:5, noteGrowth:48, noteArticles:155, notePV:'12.0K', noteRead:'45%', fit:4, fitText:'ルーティンの組み方・順番の解説は長文向き' },
+  { name:'グルタチオン美白', category:'ingredient', extRank:9, extGrowth:165, extPeak:'2025年6月', extContext:'韓国発「白玉点滴」成分の化粧品応用', noteRank:16, noteGrowth:6, noteArticles:32, notePV:'2.4K', noteRead:'50%', fit:4, fitText:'K-beauty文脈での成分解説。エビデンスベースの記事向き' },
+  { name:'美顔器×浸透', category:'routine', extRank:10, extGrowth:150, extPeak:'2025年12月', extContext:'MEDICUBE等の普及。スキンケアと家電の境界線の融解', noteRank:13, noteGrowth:10, noteArticles:42, notePV:'3.5K', noteRead:'38%', fit:3, fitText:'デバイスレビューは写真付きが良いが、比較検討は長文向き' },
+  { name:'メンズSCギフト', category:'routine', extRank:11, extGrowth:145, extPeak:'2025年12月', extContext:'ホリデーシーズンの「外さない贈答品」としての市民権獲得', noteRank:2, noteGrowth:62, noteArticles:210, notePV:'18.5K', noteRead:'48%', fit:5, fitText:'選び方ロジック・予算別比較はnoteの得意領域' },
+  { name:'炭酸洗顔×毛穴', category:'concern', extRank:12, extGrowth:140, extPeak:'2025年7月', extContext:'SOFINA iPのポアクリアリングジェルウォッシュ等による市場再活性化', noteRank:7, noteGrowth:35, noteArticles:120, notePV:'9.8K', noteRead:'42%', fit:4, fitText:'毛穴ケアの成分・メカニズム解説は長文向き' },
+  { name:'ビタミンC誘導体種類', category:'ingredient', extRank:13, extGrowth:135, extPeak:'2025年5月', extContext:'水溶性・脂溶性・両親媒性など化学的性質への専門的リテラシー', noteRank:3, noteGrowth:50, noteArticles:165, notePV:'13.5K', noteRead:'60%', fit:5, fitText:'化学的分類の体系的解説はnoteでしかできない' },
+  { name:'セラミド×摩擦レス', category:'concern', extRank:14, extGrowth:130, extPeak:'2025年9月', extContext:'キュレルの乳液ケアメイク落としの台頭', noteRank:8, noteGrowth:28, noteArticles:95, notePV:'7.6K', noteRead:'50%', fit:4, fitText:'バリア機能の科学的解説 + 製品比較は長文向き' },
+  { name:'ペプチド×エイジング', category:'ingredient', extRank:15, extGrowth:125, extPeak:'2026年1月', extContext:'レチノールに次ぐエイジングケアの主役としての認知拡大', noteRank:6, noteGrowth:38, noteArticles:130, notePV:'10.2K', noteRead:'56%', fit:5, fitText:'ペプチドの種類・作用機序は長文テキストが最適' },
+  { name:'クリーンビューティー国産', category:'routine', extRank:16, extGrowth:115, extPeak:'2025年4月', extContext:'地産地消・トレーサビリティを重視した国内ブランドへの回帰', noteRank:9, noteGrowth:22, noteArticles:78, notePV:'6.0K', noteRead:'44%', fit:4, fitText:'ブランドの思想・背景ストーリーはnote向き' },
+  { name:'ダーマコスメ×ニキビ跡', category:'concern', extRank:17, extGrowth:110, extPeak:'2025年8月', extContext:'医療と化粧品の中間領域。CAGR 7.59%で成長', noteRank:12, noteGrowth:15, noteArticles:55, notePV:'4.3K', noteRead:'52%', fit:4, fitText:'皮膚科学的アプローチの解説は長文テキスト向き' },
+  { name:'ナイトパック薬用', category:'routine', extRank:18, extGrowth:105, extPeak:'2025年11月', extContext:'イハダの薬用ナイトパック。トラネキサム酸配合による抗炎症', noteRank:17, noteGrowth:8, noteArticles:35, notePV:'2.6K', noteRead:'40%', fit:3, fitText:'使い方解説はあるが、ビジュアル（テクスチャー）の要素も大きい' },
+  { name:'導入美容液×順番', category:'routine', extRank:19, extGrowth:95, extPeak:'2025年10月', extContext:'多工程化するスキンケアルーティンの最適化への迷い', noteRank:1, noteGrowth:70, noteArticles:250, notePV:'22.0K', noteRead:'55%', fit:5, fitText:'ルーティンの論理的解説・順番比較はnoteの最強コンテンツ' },
+  { name:'トラネキサム酸×肝斑', category:'ingredient', extRank:20, extGrowth:90, extPeak:'2025年7月', extContext:'特定の肌悩みに対するピンポイントな医療的成分アプローチ', noteRank:9, noteGrowth:20, noteArticles:72, notePV:'5.8K', noteRead:'54%', fit:5, fitText:'肝斑の原因と成分アプローチは医療系長文コンテンツ向き' }
+];
+
+/* Derived: gap = extRank - noteRank (positive = note stronger, negative = external stronger) */
+themes.forEach(t => { t.gap = t.extRank - t.noteRank; });
+
+const CAT_COLORS = { ingredient:'#c4845e', concern:'#1a5c6b', routine:'#d4a853', brand:'#2d8f9e' };
+const CAT_LABELS = { ingredient:'成分系', concern:'悩み系', routine:'ルーティン系', brand:'ブランド系' };
+
+/* ================================================================
+   TABS
+   ================================================================ */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ================================================================
+   HELPERS
+   ================================================================ */
+function stars(n) { return '<span class="fit-stars">' + '★'.repeat(n) + '☆'.repeat(5-n) + '</span>'; }
+
+function gapLabel(g) {
+  if (g < -3) return { text: '⚠ 取りこぼし ' + g, cls: 'miss' };
+  if (g > 3) return { text: '★ 強み +' + g, cls: 'strong' };
+  return { text: '─ 連動 ' + (g >= 0 ? '+' : '') + g, cls: 'sync' };
+}
+
+function gapType(g) {
+  if (g < -3) return 'miss';
+  if (g > 3) return 'strong';
+  return 'sync';
+}
+
+function buildDetailHTML(t) {
+  const gl = gapLabel(t.gap);
+  return `
+  <div class="detail-panel">
+    <h3>${t.name} <span class="gap-badge ${gl.cls}" style="font-size:12px;margin-left:8px;">${gl.text}</span></h3>
+    <div class="detail-grid">
+      <div class="detail-col">
+        <h4>外部データ（Google Trends）</h4>
+        <div class="detail-row"><span class="label">順位</span><span class="value">${t.extRank}位</span></div>
+        <div class="detail-row"><span class="label">YoY成長率</span><span class="value">+${t.extGrowth}%</span></div>
+        <div class="detail-row"><span class="label">ピーク月</span><span class="value">${t.extPeak}</span></div>
+        <div class="detail-row"><span class="label">背景</span><span class="value" style="text-align:right;max-width:220px;">${t.extContext}</span></div>
+      </div>
+      <div class="detail-col">
+        <h4>noteデータ（ダミー）</h4>
+        <div class="detail-row"><span class="label">順位</span><span class="value">${t.noteRank}位</span></div>
+        <div class="detail-row"><span class="label">記事数</span><span class="value">${t.noteArticles}</span></div>
+        <div class="detail-row"><span class="label">月間PV</span><span class="value">${t.notePV}</span></div>
+        <div class="detail-row"><span class="label">読了率</span><span class="value">${t.noteRead}</span></div>
+        <div class="detail-row"><span class="label">相性スコア</span><span class="value">${stars(t.fit)}</span></div>
+      </div>
+    </div>
+    <div class="detail-insight"><strong>示唆:</strong> ${t.fitText}</div>
+  </div>`;
+}
+
+/* ================================================================
+   VIEW 1: GAP BAR CHART
+   ================================================================ */
+let gapChart;
+let gapSorted = [...themes];
+let currentBarSort = 'gap';
+
+function sortGapData(mode) {
+  if (mode === 'gap') {
+    gapSorted = [...themes].sort((a,b) => a.gap - b.gap);
+  } else {
+    gapSorted = [...themes].sort((a,b) => b.extGrowth - a.extGrowth);
+  }
+}
+
+function renderGapChart() {
+  sortGapData(currentBarSort);
+  const labels = gapSorted.map(t => t.name);
+  const data = gapSorted.map(t => t.gap);
+  const colors = data.map(v => v < 0 ? 'rgba(220,38,38,0.7)' : 'rgba(26,92,107,0.7)');
+  const borderColors = data.map(v => v < 0 ? '#dc2626' : '#1a5c6b');
+
+  if (gapChart) gapChart.destroy();
+
+  const canvas = document.getElementById('gapChart');
+  canvas.style.height = (themes.length * 36) + 'px';
+
+  gapChart = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: colors,
+        borderColor: borderColors,
+        borderWidth: 1,
+        borderRadius: 3,
+        barThickness: 22
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      onClick(e, els) {
+        if (els.length) {
+          const t = gapSorted[els[0].index];
+          document.getElementById('barDetailPanel').innerHTML = buildDetailHTML(t);
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: ctx => ctx[0].label,
+            label: ctx => {
+              const t = gapSorted[ctx.dataIndex];
+              const v = ctx.raw;
+              return v < 0
+                ? `取りこぼし: 外部${t.extRank}位 vs note${t.noteRank}位 (差${v})`
+                : `noteの強み: 外部${t.extRank}位 vs note${t.noteRank}位 (+${v})`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: '#f3f2ef' },
+          title: { display: true, text: '← 外部より弱い（取りこぼし）　|　外部より強い（noteの強み）→', font: { size: 11 }, color: '#6b7280' },
+          ticks: { font: { size: 11 } }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { font: { size: 12, family: "'Noto Sans JP'" } }
+        }
+      }
+    }
+  });
+}
+
+/* Sort buttons */
+document.querySelectorAll('[data-sort]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-sort]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentBarSort = btn.dataset.sort;
+    renderGapChart();
+  });
+});
+
+renderGapChart();
+
+/* ================================================================
+   VIEW 2: DIRECTION MATRIX (Bubble Scatter)
+   ================================================================ */
+function renderMatrix() {
+  const datasets = {};
+  themes.forEach(t => {
+    const cat = t.category;
+    if (!datasets[cat]) {
+      datasets[cat] = {
+        label: CAT_LABELS[cat] || cat,
+        data: [],
+        backgroundColor: CAT_COLORS[cat] + 'aa',
+        borderColor: CAT_COLORS[cat],
+        borderWidth: 1
+      };
+    }
+    datasets[cat].data.push({
+      x: t.noteGrowth,
+      y: t.extGrowth,
+      r: Math.max(t.noteArticles / 20, 4),
+      _theme: t
+    });
+  });
+
+  const diagonalPlugin = {
+    id: 'diagonalLine',
+    afterDraw(chart) {
+      const { ctx, chartArea: { left, right, top, bottom }, scales: { x, y } } = chart;
+      const maxVal = Math.max(x.max, y.max);
+      const x0 = x.getPixelForValue(0), y0 = y.getPixelForValue(0);
+      const x1 = x.getPixelForValue(maxVal), y1 = y.getPixelForValue(maxVal);
+      ctx.save();
+      ctx.setLineDash([6, 4]);
+      ctx.strokeStyle = '#9ca3af';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(x0, y0);
+      ctx.lineTo(x1, y1);
+      ctx.stroke();
+      ctx.restore();
+    }
+  };
+
+  const quadrantPlugin = {
+    id: 'quadrantLabels',
+    afterDraw(chart) {
+      const { ctx, chartArea: { left, right, top, bottom } } = chart;
+      ctx.save();
+      ctx.font = '11px "Noto Sans JP"';
+      ctx.fillStyle = 'rgba(107,114,128,0.35)';
+      ctx.textAlign = 'center';
+      const cx = (left + right) / 2, cy = (top + bottom) / 2;
+      ctx.fillText('取りこぼし', left + (cx - left) * 0.3, top + 24);
+      ctx.fillText('両方成長', cx + (right - cx) * 0.7, top + 24);
+      ctx.fillText('静観', left + (cx - left) * 0.3, bottom - 12);
+      ctx.fillText('noteの強み', cx + (right - cx) * 0.7, bottom - 12);
+      ctx.restore();
+    }
+  };
+
+  new Chart(document.getElementById('matrixChart'), {
+    type: 'bubble',
+    data: { datasets: Object.values(datasets) },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label(ctx) {
+              const t = ctx.raw._theme;
+              return `${t.name}: note YoY ${t.noteGrowth}%, 外部 YoY ${t.extGrowth}%, 記事数 ${t.noteArticles}`;
+            }
+          }
+        },
+        legend: { position: 'bottom', labels: { font: { size: 11, family: "'Noto Sans JP'" }, usePointStyle: true, pointStyle: 'circle' } }
+      },
+      scales: {
+        x: {
+          title: { display: true, text: 'note PV YoY 成長率 (%)', font: { size: 12 }, color: '#6b7280' },
+          grid: { color: '#f3f2ef' },
+          ticks: { font: { size: 11 }, callback: v => v + '%' },
+          min: -5
+        },
+        y: {
+          title: { display: true, text: 'Google Trends YoY 成長率 (%)', font: { size: 12 }, color: '#6b7280' },
+          grid: { color: '#f3f2ef' },
+          ticks: { font: { size: 11 }, callback: v => v + '%' },
+          min: 0
+        }
+      }
+    },
+    plugins: [diagonalPlugin, quadrantPlugin]
+  });
+}
+renderMatrix();
+
+/* ================================================================
+   VIEW 3: DETAIL TABLE
+   ================================================================ */
+let tableSortCol = 'gap';
+let tableSortAsc = true;
+let tableFilter = 'all';
+
+function renderTable() {
+  let data = [...themes];
+
+  /* Filter */
+  if (tableFilter === 'miss') data = data.filter(t => t.gap < -3);
+  else if (tableFilter === 'strong') data = data.filter(t => t.gap > 3);
+  else if (tableFilter === 'sync') data = data.filter(t => t.gap >= -3 && t.gap <= 3);
+
+  /* Sort */
+  data.sort((a, b) => {
+    let va = a[tableSortCol], vb = b[tableSortCol];
+    if (tableSortCol === 'name') { va = va.toLowerCase(); vb = vb.toLowerCase(); }
+    if (va < vb) return tableSortAsc ? -1 : 1;
+    if (va > vb) return tableSortAsc ? 1 : -1;
+    return 0;
+  });
+
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+
+  data.forEach(t => {
+    const gl = gapLabel(t.gap);
+    const tr = document.createElement('tr');
+    tr.dataset.name = t.name;
+    tr.innerHTML = `
+      <td><span class="cat-dot" style="background:${CAT_COLORS[t.category]}"></span>${t.name}</td>
+      <td>${t.extRank}</td>
+      <td>+${t.extGrowth}%</td>
+      <td>${t.noteRank}</td>
+      <td><span class="gap-badge ${gl.cls}">${gl.text}</span></td>
+      <td>${stars(t.fit)}</td>`;
+    tr.addEventListener('click', () => toggleTableDetail(tr, t));
+    tbody.appendChild(tr);
+  });
+}
+
+function toggleTableDetail(tr, t) {
+  const existing = tr.nextElementSibling;
+  if (existing && existing.classList.contains('table-detail-row')) {
+    existing.remove();
+    tr.classList.remove('expanded');
+    return;
+  }
+  /* Close any other open */
+  document.querySelectorAll('.table-detail-row').forEach(r => { r.previousElementSibling.classList.remove('expanded'); r.remove(); });
+  tr.classList.add('expanded');
+  const detailTr = document.createElement('tr');
+  detailTr.classList.add('table-detail-row');
+  detailTr.innerHTML = '<td colspan="6">' + buildDetailHTML(t) + '</td>';
+  tr.after(detailTr);
+}
+
+/* Table sort headers */
+document.querySelectorAll('.data-table th').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    if (tableSortCol === col) { tableSortAsc = !tableSortAsc; }
+    else { tableSortCol = col; tableSortAsc = true; }
+    document.querySelectorAll('.data-table th').forEach(h => {
+      h.classList.remove('sorted');
+      h.querySelector('.sort-arrow').textContent = '▲';
+    });
+    th.classList.add('sorted');
+    th.querySelector('.sort-arrow').textContent = tableSortAsc ? '▲' : '▼';
+    renderTable();
+  });
+});
+
+/* Filter buttons */
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    tableFilter = btn.dataset.filter;
+    renderTable();
+  });
+});
+
+renderTable();
+</script>
+</body>
+</html>

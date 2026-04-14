@@ -16,6 +16,11 @@
       "destination": "/_content/sofina.html"
     },
     {
+      "source": "/finder",
+      "has": [{ "type": "cookie", "key": "sh_auth" }],
+      "destination": "/_content/finder.html"
+    },
+    {
       "source": "/",
       "has": [{ "type": "cookie", "key": "sh_auth" }],
       "destination": "/_content/index.html"
